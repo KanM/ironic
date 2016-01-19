@@ -1154,3 +1154,15 @@ def driver_periodic_task(parallel=True, **other):
         return decorator(wrapper)
 
     return decorator2
+
+
+@six.add_metaclass(abc.ABCMeta)
+class CloneInterface(BaseInterface):
+    """Interface for clone disk related actions."""
+    interface_type = 'clone'
+
+
+    def clone_baremetal_disk(self, task):
+        """
+        """
+        pass

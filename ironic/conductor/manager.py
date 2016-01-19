@@ -2090,6 +2090,22 @@ class ConductorManager(base_manager.BaseConductorManager):
                                         version_manifest=object_versions)
 
 
+    def do_node_clone():
+        pass
+
+
+    def _do_node_clone():
+        pass
+
+
+    def _do_node_clone_abort():
+        pass
+
+
+    def continue_node_clone():
+        pass
+
+
 def get_vendor_passthru_metadata(route_dict):
     d = {}
     for method, metadata in route_dict.items():

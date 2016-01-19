@@ -689,3 +689,9 @@ class ConductorAPI(object):
         cctxt = self.client.prepare(topic=self.topic, version='1.31')
         return cctxt.call(context, 'object_backport_versions', objinst=objinst,
                           object_versions=object_versions)
+
+    def do_node_clone():
+        pass
+
+    def continue_node_clone():
+        pass

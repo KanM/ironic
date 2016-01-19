@@ -571,3 +571,11 @@ class AgentRAID(base.RAIDInterface):
         """
         task.node.raid_config = {}
         task.node.save()
+
+
+class AgentClone(base.CloneInterface):
+    """"""
+
+    def clone_baremetal_disk():
+        """"""
+        pass
