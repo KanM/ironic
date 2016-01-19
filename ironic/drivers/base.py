@@ -1157,7 +1157,7 @@ def driver_periodic_task(parallel=True, **other):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class CloneInterface(BaseInterface):
+class CloneInterface(object):
     """Interface for clone disk related actions."""
     interface_type = 'clone'
 
