@@ -1,0 +1,26 @@
+Under discussed:
+
+1. How to upload from iSCSI to the glance? Now seems like only the local file is allowed.
+
+2. Windows & Linux & etc extension. A new plugin in the conductor side? Maybe a new directory named 'extension', just like 'drivers'.
+
+3. Optional---The progress of the clone procedure.
+   Another 'TIMEOUT' problem---Using inspector? TBD.
+
+4. Get current clone step. No matter whether having a seperate API, or having a standalone 'clone_step' colume in node table.
+   Prefer the latter one.
+
+5. Cancel. Should be needed. Maybe can get some inspirations from the 'nova force-delete', or this spec may be helpful.
+   https://review.openstack.org/#/c/204162/
+
+States for clone:
+1. Adding into the provisioning state, which is the current state machine fsm.
+2. Adding a new state like 'power' and 'provisioning'. Peer to them.
+
+Maybe te second one. Having the states like:
+
+    Clone States
+         |_cloning
+         |_clone_failed
+         |_clone_success
+         |_clone_cancelled
