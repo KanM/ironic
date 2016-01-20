@@ -21,7 +21,22 @@ States for clone:
 Maybe te second one. Having the states like:
 
     Clone States
+         |_clone_wait?
          |_cloning
          |_clone_failed
          |_clone_success
          |_clone_cancelled
+
+Reference about the CLEANWAIT:
+
+When node is in CLEANWAIT it means that the ramdisk running on the node is doing some work and it could be abort-able via Ironic's API.
+When the conductor is doing some work it should be at CLEANING state, which should be periodically checked to see if the conductor doing the work still up and running.
+
+	1. bug 1455825.https://bugs.launchpad.net/ironic/+bug/1455825
+	2. some github code, focus on the conductor.https://github.com/openstack/ironic/commit/795b5e37caddf375f92248cbae084b8a20dccd52
+	3. state spec.https://review.openstack.org/#/c/200521/
+	4. add CLEANWAIT state:https://review.openstack.org/#/c/200152/
+	5. allow CLEANWAIT abort.https://review.openstack.org/#/c/201552/
+	6. IPA response operation code.https://review.openstack.org/#/c/202137/
+
+
