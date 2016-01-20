@@ -6,6 +6,7 @@ Under discussed:
 
 3. Optional---The progress of the clone procedure.
    Another 'TIMEOUT' problem---Using inspector? TBD.
+      A reference about deploy timeout handler: https://github.com/openstack/ironic/commit/ae79881bbc92fc8a8b1d8867ddd9bb7763d3813e
 
 4. Get current clone step. No matter whether having a seperate API, or having a standalone 'clone_step' colume in node table.
    Prefer the latter one.
