@@ -1,0 +1,21 @@
+Arch(End-2-End)
+
+1. API
+
+2. Conductor
+   |_manager
+   |_rpcapi
+   |_utils
+
+3. DB
+   |_sqlalchemy.alembic
+   |_sqlalchemy.model
+
+   Object
+
+4. Driver
+   |_base
+   |_modules.agent
+   |_modules.agent_client
+
+5. IPA
