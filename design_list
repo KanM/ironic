@@ -25,7 +25,6 @@ Maybe te second one. Having the states like:
          |_cloning
          |_clone_fail
          |_clone_success
-         |_clone_cancelled
 
 Reference about the CLEANWAIT:
 

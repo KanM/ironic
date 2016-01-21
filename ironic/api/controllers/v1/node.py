@@ -485,6 +485,21 @@ class NodeStatesController(rest.RestController):
         url_args = '/'.join([node_ident, 'states'])
         pecan.response.location = link.build_url('nodes', url_args)
 
+    @expose.expose(None, types.uuid_or_name, wtypes.text,
+                   status_code=http_client.ACCEPTED)
+    def clone(self, node_ident, target):
+        """Set the clone state of the node.
+
+        :param node_ident: the UUID or logical name of a node.
+        :param target: The desired clone state of the node.
+        :raises: ClientSideError (HTTP 409) if a clone operation is
+                 already in progress.
+        :raises: InvalidStateRequested (HTTP 400) if the requested target
+                 state is not valid.
+
+        """
+        pass
+
 
 class Node(base.APIBase):
     """API representation of a bare metal node.

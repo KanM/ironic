@@ -212,9 +212,6 @@ CLONE_FAIL = 'clone failed'
 CLONE_SUCCESS = 'clone success'
 """ Node clone successfully. """
 
-CLONE_CANCELLED = 'clone cancelled'
-""" Node is aborted in clone. """
-
 
 #####################
 # State machine model
