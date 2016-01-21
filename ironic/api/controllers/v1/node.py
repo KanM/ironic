@@ -498,7 +498,28 @@ class NodeStatesController(rest.RestController):
                  state is not valid.
 
         """
-        pass
+        api_utils.check_allow_clone_verbs(target)
+        rpc_node = api_utils.get_rpc_node(node_ident)
+        topic = pecan.request.rpcapi.get_topic_for(rpc_node)
+
+        if target not in [ir_states.CLONE_SUCCESS,
+                          ir_states.CLONE_ABORT]:
+            raise exception.InvalidStateRequested(
+                action=target, node=node_ident,
+                state=rpc_node.clone_state)
+
+        # Don't change clone state for nodes not powered off
+        elif rpc_node.power_state != ir_states.POWER_OFF:
+            raise exception.InvalidStateRequested(
+                action=target, node=node_ident,
+                state=rpc_node.power_state)
+
+        pecan.request.rpcapi.change_node_clone_state(pecan.request.context,
+                                                     rpc_node.uuid, target,
+                                                     topic)
+        # Set the HTTP Location Header
+        url_args = '/'.join([node_ident, 'states'])
+        pecan.response.location = link.build_url('nodes', url_args)
 
 
 class Node(base.APIBase):
