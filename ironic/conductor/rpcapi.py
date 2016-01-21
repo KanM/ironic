@@ -79,11 +79,13 @@ class ConductorAPI(object):
     |           object_class_action_versions, object_action and
     |           object_backport_versions
     |    1.32 - Add do_node_clean
+    |    1.33 - Add do_node_clone, continue_node_clone and
+    |           do_node_clone_abort
 
     """
 
     # NOTE(rloo): This must be in sync with manager.ConductorManager's.
-    RPC_API_VERSION = '1.32'
+    RPC_API_VERSION = '1.33'
 
     def __init__(self, topic=None):
         super(ConductorAPI, self).__init__()
@@ -690,11 +692,32 @@ class ConductorAPI(object):
         return cctxt.call(context, 'object_backport_versions', objinst=objinst,
                           object_versions=object_versions)
 
-    def do_node_clone():
-        pass
+    def do_node_clone(self, context, node_id, topic=None):
+        """Signal to conductor service to perform clone on a node.
 
-    def continue_node_clone():
-        pass
+        :param context: request context.
+        :param node_id: node ID or UUID.
+        :param topic: RPC topic. Defaults to self.topic.
+        """
+        cctxt = self.client.prepare(topic=topic or self.topic, version='1.33')
+        return cctxt.call(context, 'do_node_clone', node_id=node_id)
 
-    def do_node_clone_abort():
-        pass
+    def continue_node_clone(self, context, node_id, topic=None):
+        """Signal to conductor service to start the next clone action.
+
+        :param context: request context.
+        :param node_id: node id or uuid.
+        :param topic: RPC topic. Defaults to self.topic.
+        """
+        cctxt = self.client.prepare(topic=topic or self.topic, version='1.33')
+        return cctxt.cast(context, 'continue_node_clone', node_id=node_id)
+
+    def do_node_clone_abort(self, context, node_id, topic=None):
+        """Signal to conductor service to perform clone abort on a node.
+
+        :param context: request context.
+        :param node_id: node ID or UUID.
+        :param topic: RPC topic. Defaults to self.topic.
+        """
+        cctxt = self.client.prepare(topic=topic or self.topic, version='1.33')
+        return cctxt.call(context, 'do_node_clone_abort', node_id=node_id)
