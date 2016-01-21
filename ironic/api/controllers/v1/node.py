@@ -495,7 +495,7 @@ class NodeStatesController(rest.RestController):
         :raises: ClientSideError (HTTP 409) if a clone operation is
                  already in progress.
         :raises: InvalidStateRequested (HTTP 400) if the requested target
-                 state is not valid.
+                 state is not valid or if the node is not power off.
 
         """
         api_utils.check_allow_clone_verbs(target)
@@ -514,9 +514,15 @@ class NodeStatesController(rest.RestController):
                 action=target, node=node_ident,
                 state=rpc_node.power_state)
 
-        pecan.request.rpcapi.change_node_clone_state(pecan.request.context,
-                                                     rpc_node.uuid, target,
-                                                     topic)
+        # Clone
+        if target == ir_states.CLONE_SUCCESS:
+            pecan.request.rpcapi.do_node_clone(pecan.request.context,
+                                               rpc_node.uuid, topic)
+        # Clone abort
+        else:
+            pecan.request.rpcapi.do_node_clone_abort(pecan.request.context,
+                                               rpc_node.uuid, topic)
+
         # Set the HTTP Location Header
         url_args = '/'.join([node_ident, 'states'])
         pecan.response.location = link.build_url('nodes', url_args)

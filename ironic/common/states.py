@@ -199,7 +199,7 @@ CLONE_WAIT = 'clone wait'
 """ Node is waiting for a clone step to be finished.
 
 This will be the node's `clone_state` while the node is waiting for
-the driver to finish a clone step: 
+the driver to finish a clone step:
 prepare_iscsi_disk and dd whole disk.
 """
 

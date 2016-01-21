@@ -2098,7 +2098,7 @@ class ConductorManager(base_manager.BaseConductorManager):
         pass
 
 
-    def _do_node_clone_abort():
+    def do_node_clone_abort():
         pass
 
 
