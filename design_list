@@ -37,6 +37,9 @@ When the conductor is doing some work it should be at CLEANING state, which shou
 	3. state spec.https://review.openstack.org/#/c/200521/
 	4. add CLEANWAIT state:https://review.openstack.org/#/c/200152/
 	5. allow CLEANWAIT abort.https://review.openstack.org/#/c/201552/
+           The client has no code change;
+           API changes provisioning state check with the newly added CLEANWAIT;
+           Conductor.manager changes the 'do_provisioning_action' to apply the changes upstairs, also will call the '_do_clean_abort' when in CLEANWAIT branch;
 	6. IPA response operation code.https://review.openstack.org/#/c/202137/
 
 
