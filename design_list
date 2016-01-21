@@ -23,7 +23,7 @@ Maybe te second one. Having the states like:
     Clone States
          |_clone_wait?
          |_cloning
-         |_clone_failed
+         |_clone_fail
          |_clone_success
          |_clone_cancelled
 
