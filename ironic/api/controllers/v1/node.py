@@ -521,7 +521,7 @@ class NodeStatesController(rest.RestController):
         # Clone abort
         else:
             pecan.request.rpcapi.do_node_clone_abort(pecan.request.context,
-                                               rpc_node.uuid, topic)
+                                                     rpc_node.uuid, topic)
 
         # Set the HTTP Location Header
         url_args = '/'.join([node_ident, 'states'])

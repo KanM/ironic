@@ -695,3 +695,6 @@ class ConductorAPI(object):
 
     def continue_node_clone():
         pass
+
+    def do_node_clone_abort():
+        pass
