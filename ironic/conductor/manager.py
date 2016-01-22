@@ -2090,19 +2090,82 @@ class ConductorManager(base_manager.BaseConductorManager):
                                         version_manifest=object_versions)
 
 
-    def do_node_clone():
+    def do_node_clone(self, context, node_id):
+        """RPC method to initiate clone.
+
+        :param context: an admin context.
+        :param node_id: the ID or UUID of a node.
+
+        :raises: NodeInMaintenance if node is in maintenance mode.
+        :raises: InvalidStateRequested if the node is not power off.
+        :raises: NodeLocked if node is locked by another conductor.
+        :raises: NoFreeConductorWorker when there is no free worker to start
+                 async task.
+        """
+        with task_manager.acquire(context, node_id, shared=False,
+                                  purpose='node clone') as task:
+            node = task.node
+
+            # Check whether the node is in maintenance mode
+            if node.maintenance:
+                raise exception.NodeInMaintenance(op=_('clone'),            
+                                      node=node.uuid)
+
+            # Recheck the power state of the node if power off
+            if node.power_state != states.POWER_OFF:
+                msg = (_('The requested action "%(action)s" could not be '
+                         'done when the power state of the node is '
+                         '"(power_state)".') % {'action': target,
+                         'power_state': node.power_state})
+                raise exception.InvalidStateRequested(message=msg)
+
+            try:
+                task.process_event(
+                    'clone',
+                    callback=self._spawn_worker,
+                    call_args=(self._do_node_clone, task),
+                    err_handler=utils.clone_error_handler,
+                    target_state=states.CLONE_SUCCESS)
+            except exception.InvalidState:
+                raise exception.InvalidStateRequested(
+                    action='clone', node=node.uuid,
+                    state=node.clone_state)
+
+
+    def _do_node_clone(self, task):
+        """Internal RPC method to perform clone of a node.
+
+        :param task: a TaskManager instance with an exclusive lock on its node
+        """
         pass
 
 
-    def _do_node_clone():
+    def do_node_clone_abort(self, context, node_id):
+        """RPC method to abort an ongoing operation.
+
+        :param task: a TaskManager instance with an exclusive lock
+        """
         pass
 
 
-    def do_node_clone_abort():
-        pass
+    def continue_node_clone(self, context, node_id):
+        """RPC method to continue clone a node.
 
+        This is useful for clone tasks that are async. When they complete,
+        they call back via RPC, a new worker and lock are set up, and clone
+        continues. This can also be used to resume clone on take_over.
 
-    def continue_node_clone():
+        :param context: an admin context.
+        :param node_id: the id or uuid of a node.
+        :raises: InvalidStateRequested if the node is not in CLONE_WAIT state
+        :raises: NoFreeConductorWorker when there is no free worker to start
+                 async task
+        :raises: NodeLocked if node is locked by another conductor.
+        :raises: NodeNotFound if the node no longer appears in the database
+        :raises: NodeCloneFailure if an internal error occurred when
+                 getting the next clone steps
+
+        """
         pass
 
 

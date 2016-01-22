@@ -510,9 +510,11 @@ class NodeStatesController(rest.RestController):
 
         # Don't change clone state for nodes not powered off
         elif rpc_node.power_state != ir_states.POWER_OFF:
-            raise exception.InvalidStateRequested(
-                action=target, node=node_ident,
-                state=rpc_node.power_state)
+            msg = (_('The requested action "%(action)s" could not be '
+                     'done when the power state of the node is '
+                     '"(power_state)".') % {'action': target,
+                                            'power_state': node.power_state})
+            raise exception.InvalidStateRequested(message=msg)
 
         # Clone
         if target == ir_states.CLONE_SUCCESS:
