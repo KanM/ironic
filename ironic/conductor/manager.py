@@ -2113,10 +2113,9 @@ class ConductorManager(base_manager.BaseConductorManager):
 
             # Recheck the power state of the node if power off
             if node.power_state != states.POWER_OFF:
-                msg = (_('The requested action "%(action)s" could not be '
+                msg = (_('The requested action clone could not be '
                          'done when the power state of the node is '
-                         '"(power_state)".') % {'action': target,
-                         'power_state': node.power_state})
+                         'not POWER_OFF.'))
                 raise exception.InvalidStateRequested(message=msg)
 
             try:
@@ -2143,9 +2142,77 @@ class ConductorManager(base_manager.BaseConductorManager):
     def do_node_clone_abort(self, context, node_id):
         """RPC method to abort an ongoing operation.
 
-        :param task: a TaskManager instance with an exclusive lock
+        :param context: an admin context.
+        :param node_id: the ID or UUID of a node.
+
+        :raises: NodeInMaintenance if node is in maintenance mode.
+        :raises: InvalidStateRequested if the node is not power off.
+        :raises: NodeLocked if node is locked by another conductor.
+        :raises: NoFreeConductorWorker when there is no free worker to start
+                 async task.
         """
-        pass
+        with task_manager.acquire(context, node_id, shared=False,
+                                  purpose='node clone') as task:
+            node = task.node
+
+            # Check whether the node is in maintenance mode
+            if node.maintenance:
+                raise exception.NodeInMaintenance(op=_('clone'),
+                                      node=node.uuid)
+
+            # Recheck the power state of the node if power off
+            if node.power_state != states.POWER_OFF:
+                msg = (_('The requested action clone abort could not be '
+                         'done when the power state of the node is '
+                         'not POWER_OFF.'))
+                raise exception.InvalidStateRequested(message=msg)
+
+            # Check whether the clone state of node is CLONE_WAIT
+            if node.clone_state != states.CLONE_WAIT:
+                msg = (_('The requested action clone abort could not be '
+                         'done when the clone state of the node is '
+                         'not CLONE_WAIT.'))
+                raise exception.InvalidStateRequested(message=msg)
+
+            try:
+                task.process_event(
+                    'clone_abort',
+                    callback=self._spawn_worker,
+                    call_args=(self._do_node_clone_abort, task),
+                    err_handler=utils.clone_error_handler,
+                    target_state=states.CLONE_FAIL)
+            except exception.InvalidState:
+                raise exception.InvalidStateRequested(
+                    action='clone_abort', node=node.uuid,
+                    state=node.clone_state)
+
+
+    def _do_node_clone_abort(self, task):
+        """Internal RPC method to perform clone of a node.
+
+        :param task: a TaskManager instance with an exclusive lock on its node
+        """
+        node = task.node
+        try:
+	    task.driver.clone.tear_down_clone(task)
+        except Exception as e:
+            LOG.exception(_LE('Failed to tear down clone for node %(node)s '
+                              'after aborting the operation. Error: %(err)s'),
+                              {'node': node.uuid, 'err': e})
+            error_msg = _('Failed to tear down clone after aborting '
+                          'the operation')
+            utils.clone_error_handler(task, error_msg,
+                                      tear_down_clone=False,
+                                      set_fail_state=False)
+            return
+
+        info_message = _('Clone operation aborted for node %s') % node.uuid
+        last_error = _('By request, the clone operation was aborted')
+
+        node.last_error = last_error
+        node.clone_step = None
+        node.save()
+        LOG.info(info_message)
 
 
     def continue_node_clone(self, context, node_id):
@@ -2164,7 +2231,6 @@ class ConductorManager(base_manager.BaseConductorManager):
         :raises: NodeNotFound if the node no longer appears in the database
         :raises: NodeCloneFailure if an internal error occurred when
                  getting the next clone steps
-
         """
         pass
 

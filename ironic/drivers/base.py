@@ -980,6 +980,23 @@ class RAIDInterface(BaseInterface):
         return raid.get_logical_disk_properties(self.raid_schema)
 
 
+@six.add_metaclass(abc.ABCMeta)
+class CloneInterface(object):
+    """Interface for clone disk related actions."""
+    interface_type = 'clone'
+
+
+    def clone_baremetal_disk(self, task):
+        """
+        """
+        pass
+
+    def tear_down_clone(self, task):
+        """
+        """
+        pass
+
+
 def _validate_argsinfo(argsinfo):
     """Validate args info.
 
@@ -1154,15 +1171,3 @@ def driver_periodic_task(parallel=True, **other):
         return decorator(wrapper)
 
     return decorator2
-
-
-@six.add_metaclass(abc.ABCMeta)
-class CloneInterface(object):
-    """Interface for clone disk related actions."""
-    interface_type = 'clone'
-
-
-    def clone_baremetal_disk(self, task):
-        """
-        """
-        pass

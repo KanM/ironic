@@ -579,3 +579,7 @@ class AgentClone(base.CloneInterface):
     def clone_baremetal_disk():
         """"""
         pass
+
+    def tear_down_clone():
+        """"""
+        pass
