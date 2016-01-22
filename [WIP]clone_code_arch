@@ -10,7 +10,8 @@ Arch(End-2-End)
    |   |_ do_node_clone
    |   |_ _do_node_clone
    |   |_ continue_node_clone
-   |   |_do_node_clone_abort
+   |   |_ do_node_clone_abort
+   |   |_ _do_node_clone_abort
    |_rpcapi
    |   |_do_node_clone
    |   |_continue_node_clone
@@ -28,9 +29,11 @@ Arch(End-2-End)
    |_base
    |   |_CloneInterface
    |      |_clone_baremetal_disk
+   |      |_tear_down_clone
    |_modules.agent
    |   |_AgentClone
    |      |_clone_baremetal_disk
+   |      |_tear_down_clone
    |_modules.agent_client
 
 5. IPA
