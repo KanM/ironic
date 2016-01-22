@@ -396,3 +396,24 @@ def _validate_user_clean_steps(task, user_steps):
 
     if errors:
         raise exception.InvalidParameterValue('; '.join(errors))
+
+
+def clone_error_handler(task, msg, tear_down_clone=True,
+                        set_fail_state=True):
+    """Put a failed node in CLONE_FAIL."""
+    # Reset clone step, msg should include current step
+    if task.node.clone_state in (states.CLONING, states.CLONE_WAIT):
+        task.node.clone_step = {}
+
+    task.node.last_error = msg
+    task.node.save()
+    if tear_down_clone:
+        try:
+            task.driver.clone.tear_down_clone(task)
+        except Exception as e:
+            msg = (_LE('Failed to tear down clone on node %(uuid)s, '
+                       'reason: %(err)s'), {'err': e, 'uuid': task.node.uuid})
+            LOG.exception(msg)
+
+    if set_fail_state:
+        task.process_event('fail', target_state=states.CLONE_FAIL)
