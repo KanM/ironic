@@ -53,3 +53,11 @@ When the conductor is doing some work it should be at CLEANING state, which shou
 	6. IPA response operation code.https://review.openstack.org/#/c/202137/
 
 
+New questions when comparing to the CLEAN:
+1. The clean pipeline has a validate in power, what for? Find it in code.
+2. How is the continue_node_clean be used? Is it called like?
+   IPA-->vendor_passthru-->API-->conductor.rpcapi-->conductor.manager
+
+New clues in CLEAN:
+1. do_node_clean is used in the manual cleaning procedure, and it will be exposed to the API by a under review patch.
+2. _do_node_clean is used in the automated cleaning procedure, it is triggered in the provision or tear_down.
