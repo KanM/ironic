@@ -1,29 +1,43 @@
-Ironic
-======
+Arch(End-2-End)
 
-Ironic is an integrated OpenStack project which aims to provision bare
-metal machines instead of virtual machines, forked from the Nova Baremetal
-driver. It is best thought of as a bare metal hypervisor **API** and a set
-of plugins which interact with the bare metal hypervisors. By default, it
-will use PXE and IPMI together to provision and turn on/off machines,
-but Ironic also supports vendor-specific plugins which may implement
-additional functionality.
+1. API
+   |_node-clone
+   |_utils(check API version)
+   |_else: webapi/reno/version
 
------------------
-Project Resources
------------------
+2. Conductor
+   |_manager
+   |   |_ do_node_clone
+   |   |_ _do_node_clone
+   |   |_ continue_node_clone
+   |   |_ do_node_clone_abort
+   |   |_ _do_node_clone_abort
+   |_rpcapi
+   |   |_do_node_clone
+   |   |_continue_node_clone
+   |   |_do_node_clone_abort
+   |_utils
+       |_clone_error_handler
 
-* Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/ironic
-* Source: http://git.openstack.org/cgit/openstack/ironic
-* Bugs: http://bugs.launchpad.net/ironic
-* Wiki: https://wiki.openstack.org/wiki/Ironic
+3. DB
+   |_sqlalchemy.alembic.versions(4 upgrade and downgrade)
+   |_sqlalchemy.model
 
-Project status, bugs, and blueprints are tracked on Launchpad:
+   Object
+   |_node
 
-  http://launchpad.net/ironic
+4. Driver
+   |_base
+   |   |_CloneInterface
+   |      |_clone_baremetal_disk
+   |      |_tear_down_clone
+   |_modules.agent
+   |   |_AgentClone
+   |      |_clone_baremetal_disk
+   |      |_tear_down_clone
+   |_modules.agent_client
 
-Anyone wishing to contribute to an OpenStack project should
-find a good reference here:
+5. IPA
 
-  http://docs.openstack.org/infra/manual/developers.html
+6. State
+   |_common.states-Clone states
