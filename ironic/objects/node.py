@@ -45,7 +45,8 @@ class Node(base.IronicObject, object_base.VersionedObjectDictCompat):
     # Version 1.13: Add touch_provisioning()
     # Version 1.14: Add _validate_property_values() and make create()
     #               and save() validate the input of property values.
-    VERSION = '1.14'
+    # Version 1.15: Add clone_step and clone_state
+    VERSION = '1.15'
 
     dbapi = db_api.get_instance()
 
@@ -65,6 +66,13 @@ class Node(base.IronicObject, object_base.VersionedObjectDictCompat):
         # being executed, or None, indicating cleaning is not in progress
         # or has not yet started.
         'clean_step': object_fields.FlexibleDictField(nullable=True),
+
+        # A clone step dictionary, indicating the current clone step
+        # being executed, or None, indicating clone is not in progress
+        # or has not yet started.
+        'clone_step': object_fields.FlexibleDictField(nullable=True),
+        # One of states.CLONE_WAIT|CLONING|CLONE_FAIL|CLONE_SUCCESS|CLONE_ABORT
+        'clone_state': object_fields.StringField(nullable=True),
 
         'raid_config': object_fields.FlexibleDictField(nullable=True),
         'target_raid_config': object_fields.FlexibleDictField(nullable=True),

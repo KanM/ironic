@@ -126,6 +126,8 @@ class Node(Base):
     driver_info = Column(db_types.JsonEncodedDict)
     driver_internal_info = Column(db_types.JsonEncodedDict)
     clean_step = Column(db_types.JsonEncodedDict)
+    clone_step = Column(db_types.JsonEncodedDict)
+    clone_state = Column(String(15), nullable=True)
 
     raid_config = Column(db_types.JsonEncodedDict)
     target_raid_config = Column(db_types.JsonEncodedDict)
