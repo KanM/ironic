@@ -205,6 +205,16 @@ class BaseAgentVendor(base.VendorInterface):
                                                     'payload version: %s')
                                                   % version)
 
+    def notify_conductor_resume_clone(self, task):
+        LOG.debug('Sending RPC to conductor to resume clone for node %s',
+                  task.node.uuid)
+        uuid = task.node.uuid
+        rpc = rpcapi.ConductorAPI()
+        topic = rpc.get_topic_for(task.node)
+        # Need to release the lock to let the conductor take it
+        task.release_resources()
+        rpc.continue_node_clone(task.context, uuid, topic=topic)
+
     def notify_conductor_resume_clean(self, task):
         LOG.debug('Sending RPC to conductor to resume cleaning for node %s',
                   task.node.uuid)
@@ -333,6 +343,9 @@ class BaseAgentVendor(base.VendorInterface):
                 LOG.debug('Heartbeat from node %(node)s in maintenance mode; '
                           'not taking any action.', {'node': node.uuid})
                 return
+            elif node.clone_state in (stetes.CLONE_WAITE, states.CLONING):
+                # call notify_conductor_resume_clone
+                pass
             elif (node.provision_state == states.DEPLOYWAIT and
                   not self.deploy_has_started(task)):
                 msg = _('Node failed to get image for deploy.')
