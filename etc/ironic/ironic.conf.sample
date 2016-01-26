@@ -623,6 +623,10 @@
 # (integer value)
 #check_provision_state_interval=60
 
+# Interval between checks of clone timeouts, in seconds.
+# (integer value)
+#check_clone_state_interval=60
+
 # Timeout (seconds) to wait for a callback from a deploy
 # ramdisk. Set to 0 to disable timeout. (integer value)
 #deploy_callback_timeout=1800
@@ -700,6 +704,12 @@
 # be put in the "clean failed" provision state. Set to 0 to
 # disable timeout. (integer value)
 #clean_callback_timeout=1800
+
+# Timeout (seconds) to wait for a callback from the ramdisk
+# doing the clone. If the timeout is reached the node will
+# be put in the "CLONE_FAIL" clone state. Set to 0 to
+# disable timeout. (integer value)
+#clone_callback_timeout=1800
 
 
 [console]

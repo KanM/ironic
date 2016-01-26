@@ -2108,8 +2108,8 @@ class ConductorManager(base_manager.BaseConductorManager):
 
             # Check whether the node is in maintenance mode
             if node.maintenance:
-                raise exception.NodeInMaintenance(op=_('clone'),            
-                                      node=node.uuid)
+                raise exception.NodeInMaintenance(op=_('clone'),
+                                                  node=node.uuid)
 
             # Recheck the power state of the node if power off
             if node.power_state != states.POWER_OFF:
@@ -2233,6 +2233,44 @@ class ConductorManager(base_manager.BaseConductorManager):
                  getting the next clone steps
         """
         pass
+
+
+    @periodic_task.periodic_task(
+        spacing=CONF.conductor.check_clone_state_interval)
+    def _check_clonewait_timeouts(self, context):
+        """Periodically checks for nodes being cloned.
+
+        If a node doing clone is unresponsive (detected when it stops
+        heart beating), the operation should be aborted.
+
+        :param context: request context.
+        """
+        callback_timeout = CONF.conductor.clone_callback_timeout
+        if not callback_timeout:
+            return
+
+        filters = {'clone_state': states.CLEANWAIT,
+                   'maintenance': False}
+        node_iter = self.iter_nodes(filters=filters)
+
+        workers_count = 0
+        for node_uuid in node_iter:
+            try:
+                with task_manager.acquire(context, node_uuid,
+                                          purpose='clone state check')
+                    as task:
+                    last_error = _("Timeout reached while clone the node. "
+                       "Please check if the ramdisk responsible for the "
+                       "clone is running on the node.")
+                    task.node.last_error = last_error
+                    task.process_event('fail', target_state='CLONE_SUCCESS')
+            except exception.NoFreeConductorWorker:
+                break
+            except (exception.NodeLocked, exception.NodeNotFound):
+                continue
+            workers_count += 1
+            if workers_count == CONF.conductor.periodic_max_workers:
+                break
 
 
 def get_vendor_passthru_metadata(route_dict):
