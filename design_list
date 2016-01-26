@@ -61,3 +61,16 @@ New questions when comparing to the CLEAN:
 New clues in CLEAN:
 1. do_node_clean is used in the manual cleaning procedure, and it will be exposed to the API by a under review patch.
 2. _do_node_clean is used in the automated cleaning procedure, it is triggered in the provision or tear_down.
+
+
+About the 'CLONE' in concept:
+1. It is the operation
+2. It is an event in logic
+Make a comparision with CLEAN:
+It is only an event in provision states, which means the 'provision_state' is the trigger while the 'clean' is an event in the state machine of provision.
+The operation is started by changing the provision state, it corresponds to the 'provisioning_error_handler' for error recycle;
+The clean is executed as an event following the fsm principle within provison, it correspnds to the 'cleaning_error_handler' for error recycle.
+
+So, the 'CLONE' should always like this to seperate from the concept level. Need investigate this, not sure whether the following ways can solve, but some clues:
+1. Add a 'target_clone_state' property in node.
+2. Make two error handler functions for two different levels.
