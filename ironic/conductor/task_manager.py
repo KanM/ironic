@@ -364,6 +364,53 @@ class TaskManager(object):
         # publish the state transition by saving the Node
         self.node.save()
 
+'''
+    def process_clone_event(self, event, callback=None, call_args=None,
+                            call_kwargs=None, err_handler=None,
+                            target_state=None):
+        """Process the given event for the task's current clone state.
+
+        :param event: the name of the event to process
+        :param callback: optional callback to invoke upon event transition
+        :param call_args: optional \*args to pass to the callback method
+        :param call_kwargs: optional \**kwargs to pass to the callback method
+        :param err_handler: optional error handler to invoke if the
+                callback fails, eg. because there are no workers available
+        :param target_state: The target clone state for the node.
+        :raises: InvalidState if the event is not allowed.
+        """
+        # This may raise InvalidState, if this eventis not allowed in
+        # the current state.
+
+        ## TBD ##
+        # Need verify the transaction between 'FROM' and 'TO'.
+
+        # stash current states in the error handler if callback is set,
+        # in case we fail to get a worker from the pool
+        if err_handler and callback:
+            # (Kan)This is the provisiong error handler function
+            # It has the input of 'FROM' and 'TO' of provision states
+            self.set_spawn_error_hook(err_handler, self.node,
+                                      self.node.provision_state,
+                                      self.node.target_provision_state)
+        # (Kan) ditto--TBD
+        self.node.clone_state = self.fsm.current_state
+        self.node.target_provision_state = self.fsm.target_state
+
+        # set up the async worker
+        if callback:
+            # clear the error if we're going to start work in a callback
+            self.node.last_error = None
+            if call_args is None:
+                call_args = ()
+            if call_kwargs is None:
+                call_kwargs = {}
+            self.spawn_after(callback, *call_args, **call_kwargs)
+
+        # publish the state transition by saving the Node
+        self.node.save()
+'''
+
     def __enter__(self):
         return self
 
