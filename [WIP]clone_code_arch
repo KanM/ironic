@@ -12,6 +12,7 @@ Arch(End-2-End)
    |   |_ continue_node_clone
    |   |_ do_node_clone_abort
    |   |_ _do_node_clone_abort
+   |   |_ _check_clonewait_timeouts
    |_rpcapi
    |   |_do_node_clone
    |   |_continue_node_clone
@@ -41,3 +42,7 @@ Arch(End-2-End)
 
 6. State
    |_common.states-Clone states
+
+7. Conf
+   |_check_clone_state_interval
+   |_clone_callback_timeout
