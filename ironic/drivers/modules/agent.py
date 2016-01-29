@@ -33,8 +33,8 @@ from ironic.conductor import task_manager
 from ironic.conductor import utils as manager_utils
 from ironic.drivers import base
 from ironic.drivers.modules import agent_base_vendor
+from ironic.drivers.modules import agent_client
 from ironic.drivers.modules import deploy_utils
-
 
 agent_opts = [
     cfg.StrOpt('agent_pxe_append_params',
@@ -576,9 +576,14 @@ class AgentRAID(base.RAIDInterface):
 class AgentClone(base.CloneInterface):
     """"""
 
-    def clone_baremetal_disk():
+    def clone_baremetal_disk(task):
         """"""
-        pass
+        client = agent_client.AgentClient()
+        node = task.node
+        iscsi_ip = task.node.driver_info.get('iscsi_ip')
+        iqn = task.node.driver_info.get('iqn')
+        lun = task.node.driver_info.get('lun')
+        client.clone_disk(node, iscsi_ip, iqn, lun)
 
     def tear_down_clone():
         """"""
