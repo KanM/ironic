@@ -64,6 +64,7 @@ class AgentAndIPMIToolDriver(base.BaseDriver):
         self.raid = agent.AgentRAID()
         self.inspect = inspector.Inspector.create_if_enabled(
             'AgentAndIPMIToolDriver')
+        self.clone = agent.AgetnClone()
 
 
 class AgentAndIPMINativeDriver(base.BaseDriver):

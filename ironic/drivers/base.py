@@ -124,6 +124,14 @@ class BaseDriver(object):
     """
     standard_interfaces.append('raid')
 
+    clone = None
+    """`Standard` attribute for Disk Clone related features.
+
+    A reference  to an instance of :class:CloneInterface.
+    May be None, if unsupported by a driver.
+    """
+    standard_interfaces.append('clone')
+
     @abc.abstractmethod
     def __init__(self):
         pass
