@@ -985,7 +985,7 @@ class CloneInterface(object):
     """Interface for clone disk related actions."""
     interface_type = 'clone'
 
-
+    @abc.abstractmethod
     def clone_baremetal_disk(self, task):
         """
         """

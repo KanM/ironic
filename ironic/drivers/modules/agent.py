@@ -576,7 +576,7 @@ class AgentRAID(base.RAIDInterface):
 class AgentClone(base.CloneInterface):
     """"""
 
-    def clone_baremetal_disk(task):
+    def clone_baremetal_disk(self, task):
         """"""
         client = agent_client.AgentClient()
         node = task.node
