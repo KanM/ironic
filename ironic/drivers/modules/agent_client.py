@@ -169,3 +169,12 @@ class AgentClient(object):
         return self._command(node=node,
                              method='standby.power_off',
                              params={})
+
+    def clone_disk(self, node, iscsi_ip, iqn, lun):
+        """Copy local disk to iscsi disk."""
+        params = {'iscsi_ip': iscsi_ip,
+                  'iqn': iqn,
+                  'lun': lun}
+        return self._command(node=node,
+                             method='clone.clone_disk',
+                             params=params)
