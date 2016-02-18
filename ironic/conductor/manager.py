@@ -2220,19 +2220,26 @@ class ConductorManager(base_manager.BaseConductorManager):
 
         This is useful for clone tasks that are async. When they complete,
         they call back via RPC, a new worker and lock are set up, and clone
-        continues. This can also be used to resume clone on take_over.
+        continues.
 
         :param context: an admin context.
         :param node_id: the id or uuid of a node.
         :raises: InvalidStateRequested if the node is not in CLONE_WAIT state
         :raises: NoFreeConductorWorker when there is no free worker to start
-                 async task
+                 async task.
         :raises: NodeLocked if node is locked by another conductor.
-        :raises: NodeNotFound if the node no longer appears in the database
-        :raises: NodeCloneFailure if an internal error occurred when
-                 getting the next clone steps
+        :raises: NodeNotFound if the node no longer appears in the database.
         """
-        pass
+        # Connect iSCSI disk
+        _connect_iSCSI_disk()
+
+        # Configure the iSCSI disk, like format the configdrive, clean
+        # the key files etc.
+        _configure_iSCSI_disk()
+
+        # Upload the configured disk to glance
+        # TBD.
+        _upload_image()
 
 
     @periodic_task.periodic_task(
