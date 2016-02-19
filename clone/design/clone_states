@@ -24,7 +24,7 @@ INITIAL/AVAILABLE --------- > [CLONING] ------ > [CLONE_WAIT] ---+
    |                              |fail                |         |
    |                              |                    |         |
    |                              +--- > CLONE_FAIL < -+         |
-   |                                      ^   ^                  |
+   |                                      |   ^                  |
    |            R:clone_clean             |   |   R:clone_abort  |
    +--------------------------------------+   +------------------+
 
