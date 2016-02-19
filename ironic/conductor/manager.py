@@ -2136,6 +2136,8 @@ class ConductorManager(base_manager.BaseConductorManager):
 
         :param task: a TaskManager instance with an exclusive lock on its node
         """
+
+        task.driver.clone_baremetal_disk(task);
         pass
 
 
@@ -2230,17 +2232,54 @@ class ConductorManager(base_manager.BaseConductorManager):
         :raises: NodeLocked if node is locked by another conductor.
         :raises: NodeNotFound if the node no longer appears in the database.
         """
-        # Connect iSCSI disk
-        _connect_iSCSI_disk()
 
-        # Configure the iSCSI disk, like format the configdrive, clean
-        # the key files etc.
-        _configure_iSCSI_disk()
+        LOG.debug("RPC continue_node_clone called for node %s.", node_id)
 
-        # Upload the configured disk to glance
-        # TBD.
-        _upload_image()
+        with task_manager.acquire(context, node_id, shared=False,
+                                  purpose='node clone') as task:
+            node = task.node
 
+            # Connect iSCSI disk
+            iscsi_disk = _connect_iSCSI_disk(node)
+
+            # Configure the iSCSI disk, like format the configdrive, clean
+            # the key files etc.
+            _configure_iSCSI_disk(node, iscsi_disk)
+
+            # Upload the configured disk to glance
+            _upload_image(img_disk)
+
+
+    def _connect_iSCSI_disk(self, task)
+        LOG.debug("_connect_iSCSI_disk called")
+        iscsi_ip = task.node.driver_info.get('iscsi_ip')
+        iqn = task.node.driver_info.get('iqn')
+        lun = task.node.driver_info.get('lun')
+        cmd = ['iscsiadm', '-m', 'node', '-T', iqn, '-p', iscsi_ip, '-l']
+        _execute(cmd, "prepare_iscsi_disk failed")
+
+        # check iscsi disk via cmd
+        # ls /dev/disk/by-path/*iscsi-p1value*  -l |grep -v '[1-9]$'
+        # | awk {'print $9'}
+        # example: ip-127.0.0.1:3260-iscsi-p1value-lun-1 -> ../../sda
+        cmd = ['ls',
+               '/dev/disk/by-path/ip-' + iscsi_ip
+               + ':3260-iscsi-' + iqn + '-' + lun]
+        #       '-l|grep', '-v', '\'[1-9]$\'', '|', 'awk', '{\'print $9\'}']
+        dev = _execute(cmd, "prepare_iscsi_disk failed")
+        LOG.debug("_connect_iSCSI_disk return dev %s" % dev)
+        return dev
+
+    def _configure_iSCSI_disk(self, node, iscsi_disk)
+        LOG.debug("_configure_iSCSI_disk called: node=%(node)s, iscsi_disk=%(iscsi_disk)s"
+                  % {'node': node, 'iscsi_disk': iscsi_disk)
+                      
+        # reset the image to clean the files added/updated by cloudinit
+        cmd = ['virt-sysprep']
+        # remove the config-drive
+        cmd = ['echo -e "d\n2\nw\n" | fdisk $1']
+        
+        
 
     @periodic_task.periodic_task(
         spacing=CONF.conductor.check_clone_state_interval)
