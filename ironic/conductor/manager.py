@@ -2138,7 +2138,6 @@ class ConductorManager(base_manager.BaseConductorManager):
         """
 
         task.driver.clone_baremetal_disk(task);
-        pass
 
 
     def do_node_clone_abort(self, context, node_id):
