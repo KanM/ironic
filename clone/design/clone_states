@@ -1,0 +1,70 @@
+There are two ways of realizing the states of clone:
+1. Adding into the provisioning state, which is the current state
+   machine fsm.
+2. Adding a new state like 'power' and 'provisioning'. Peer to them.
+For the clone is even in concept of provisioning, here use the second
+one in design.
+
+
+Although the diagram is like the state machine of provisioning state,
+here the realization of clone will not use the state machine type,
+while the transactions among the clone states imply the work flow.
+That means clone will follow the flow driven by the actions, which are
+"clone", "clone_abort" and "clone_clean".
+
+
+The 'faked' state machine of clone:
+
+INITIAL/AVAILABLE --------- > [CLONING] ------ > [CLONE_WAIT] ---+
+   ^   ^           R:clone      | | ^    wait        | |         |
+   |   |                        | | |                | |         |      
+   |   |         done           | | |     resume     | |         |
+   |   +------------------------+ | +----------------+ |fail     |
+   |                              |                    |         |
+   |                              |fail                |         |
+   |                              |                    |         |
+   |                              +--- > CLONE_FAIL < -+         |
+   |                                      ^   ^                  |
+   |            R:clone_clean             |   |   R:clone_abort  |
+   +--------------------------------------+   +------------------+
+
+* [STATE] indicates an active state. Ironic is doing cloning to the
+  node.
+* STATE indicates a stable (or passive) state. Ironic will not transition
+  unless receiving a request via the API.
+* R:request indicates the request which must be passed to the API to
+  initiate a transition out of a stable state.
+
+
+Description of the states:
+
+INITIAL/AVAILABLE
+  This is the initial state of a node before clone.
+
+CLONING
+  When the conductor is doing some work it should be at CLONING state,
+  which should be periodically checked to see if the conductor doing the
+  work still up and running.
+
+CLONE_WAIT
+  When node is in CLONE_WAIT it means that the ramdisk running on the node
+  is doing some work, for now the work are connecting the iSCSI disk and
+  copy the content of disk on baremetal node to it.  And it could be abort-
+  -able via Ironic's API.
+
+CLONE_FAIL
+  This means the clone operation of baremetal node is failed. It will happen
+  either really fail from CLONING/CLONE_WAIT or abort from CLONE_WAIT.
+
+
+Description of the requests:
+
+clone
+  Trigger the clone operation of the node.
+
+clone_abort
+  Abort the clone operation when the node is in CLONE_WAIT state.
+
+clone_clean
+  Clean the failed record of clone operation and revert the node to the
+  initial state.

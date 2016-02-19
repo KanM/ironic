@@ -14,18 +14,6 @@ Under discussed:
 5. Cancel. Should be needed. Maybe can get some inspirations from the 'nova force-delete', or this spec may be helpful.
    https://review.openstack.org/#/c/204162/
 
-States for clone:
-1. Adding into the provisioning state, which is the current state machine fsm.
-2. Adding a new state like 'power' and 'provisioning'. Peer to them.
-
-Maybe te second one. Having the states like:
-
-    Clone States
-         |_clone_wait?
-         |_cloning
-         |_clone_fail
-         |_clone_success
-         |_clone_abort
 
 Q: What is the releationship of the 'maintenance' for the clone?
    Should the the process of clone consider the 'maintenance' check in code like clean?
