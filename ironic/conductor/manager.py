@@ -2275,11 +2275,11 @@ class ConductorManager(base_manager.BaseConductorManager):
                   % {'node': node, 'iscsi_disk': iscsi_disk)
                       
         # reset the image to clean the files added/updated by cloudinit
-        cmd = ['virt-sysprep']
+        cmd = ['virt-sysprep', iscsi_disk]
         common_utils.execute(cmd)
 
         # remove the config-drive
-        cmd = ['echo -e "d\n2\nw\n" | fdisk $1']
+        cmd = ['echo -e "d\n2\nw\n" | fdisk ', iscsi_disk]
         common_utils.execute(cmd)
         
         
