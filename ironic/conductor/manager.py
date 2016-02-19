@@ -63,6 +63,7 @@ from ironic.common.i18n import _LW
 from ironic.common import images
 from ironic.common import states
 from ironic.common import swift
+from ironic.common import common_utils
 from ironic.conductor import base_manager
 from ironic.conductor import task_manager
 from ironic.conductor import utils
@@ -2255,7 +2256,7 @@ class ConductorManager(base_manager.BaseConductorManager):
         iqn = task.node.driver_info.get('iqn')
         lun = task.node.driver_info.get('lun')
         cmd = ['iscsiadm', '-m', 'node', '-T', iqn, '-p', iscsi_ip, '-l']
-        _execute(cmd, "prepare_iscsi_disk failed")
+        common_utils.execute(cmd, "prepare_iscsi_disk failed")
 
         # check iscsi disk via cmd
         # ls /dev/disk/by-path/*iscsi-p1value*  -l |grep -v '[1-9]$'
@@ -2265,7 +2266,7 @@ class ConductorManager(base_manager.BaseConductorManager):
                '/dev/disk/by-path/ip-' + iscsi_ip
                + ':3260-iscsi-' + iqn + '-' + lun]
         #       '-l|grep', '-v', '\'[1-9]$\'', '|', 'awk', '{\'print $9\'}']
-        dev = _execute(cmd, "prepare_iscsi_disk failed")
+        dev = common_utilscmd, "prepare_iscsi_disk failed")
         LOG.debug("_connect_iSCSI_disk return dev %s" % dev)
         return dev
 
@@ -2275,8 +2276,11 @@ class ConductorManager(base_manager.BaseConductorManager):
                       
         # reset the image to clean the files added/updated by cloudinit
         cmd = ['virt-sysprep']
+        common_utils.execute(cmd)
+
         # remove the config-drive
         cmd = ['echo -e "d\n2\nw\n" | fdisk $1']
+        common_utils.execute(cmd)
         
         
 
