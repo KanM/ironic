@@ -63,7 +63,7 @@ from ironic.common.i18n import _LW
 from ironic.common import images
 from ironic.common import states
 from ironic.common import swift
-from ironic.common import common_utils
+from ironic.common import utils as common_utils
 from ironic.conductor import base_manager
 from ironic.conductor import task_manager
 from ironic.conductor import utils
@@ -175,6 +175,10 @@ conductor_opts = [
                       'ramdisk doing the cleaning. If the timeout is reached '
                       'the node will be put in the "clean failed" provision '
                       'state. Set to 0 to disable timeout.')),
+
+    cfg.IntOpt('check_clone_state_interval',
+               default=1800,
+               help=_('interval of checking clone state' )),
 ]
 CONF = cfg.CONF
 CONF.register_opts(conductor_opts, 'conductor')
@@ -2250,7 +2254,7 @@ class ConductorManager(base_manager.BaseConductorManager):
             _upload_image(img_disk)
 
 
-    def _connect_iSCSI_disk(self, task)
+    def _connect_iSCSI_disk(self, task):
         LOG.debug("_connect_iSCSI_disk called")
         iscsi_ip = task.node.driver_info.get('iscsi_ip')
         iqn = task.node.driver_info.get('iqn')
@@ -2266,13 +2270,13 @@ class ConductorManager(base_manager.BaseConductorManager):
                '/dev/disk/by-path/ip-' + iscsi_ip
                + ':3260-iscsi-' + iqn + '-' + lun]
         #       '-l|grep', '-v', '\'[1-9]$\'', '|', 'awk', '{\'print $9\'}']
-        dev = common_utilscmd, "prepare_iscsi_disk failed")
+        dev = common_utils(cmd, "prepare_iscsi_disk failed")
         LOG.debug("_connect_iSCSI_disk return dev %s" % dev)
         return dev
 
-    def _configure_iSCSI_disk(self, node, iscsi_disk)
+    def _configure_iSCSI_disk(self, node, iscsi_disk):
         LOG.debug("_configure_iSCSI_disk called: node=%(node)s, iscsi_disk=%(iscsi_disk)s"
-                  % {'node': node, 'iscsi_disk': iscsi_disk)
+                  % {'node': node, 'iscsi_disk': iscsi_disk})
                       
         # reset the image to clean the files added/updated by cloudinit
         cmd = ['virt-sysprep', iscsi_disk]
@@ -2306,8 +2310,7 @@ class ConductorManager(base_manager.BaseConductorManager):
         for node_uuid in node_iter:
             try:
                 with task_manager.acquire(context, node_uuid,
-                                          purpose='clone state check')
-                    as task:
+                                          purpose='clone state check') as task:
                     last_error = _("Timeout reached while clone the node. "
                        "Please check if the ramdisk responsible for the "
                        "clone is running on the node.")

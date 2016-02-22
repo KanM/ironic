@@ -364,7 +364,7 @@ class TaskManager(object):
         # publish the state transition by saving the Node
         self.node.save()
 
-'''
+    '''
     def process_clone_event(self, event, callback=None, call_args=None,
                             call_kwargs=None, err_handler=None,
                             target_state=None):
@@ -409,7 +409,7 @@ class TaskManager(object):
 
         # publish the state transition by saving the Node
         self.node.save()
-'''
+    '''
 
     def __enter__(self):
         return self
