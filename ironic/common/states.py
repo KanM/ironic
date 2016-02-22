@@ -16,13 +16,11 @@
 
 """
 Mapping of bare metal node states.
-
 Setting the node `power_state` is handled by the conductor's power
 synchronization thread. Based on the power state retrieved from the driver
 for the node, the state is set to POWER_ON or POWER_OFF, accordingly.
 Should this fail, the `power_state` value is left unchanged, and the node
 is placed into maintenance mode.
-
 The `power_state` can also be set manually via the API. A failure to change
 the state leaves the current state unchanged. The node is NOT placed into
 maintenance mode in this case.
@@ -49,27 +47,22 @@ VERBS = {
     'clean': 'clean',
 }
 """ Mapping of state-changing events that are PUT to the REST API
-
 This is a mapping of target states which are PUT to the API, eg,
     PUT /v1/node/states/provision {'target': 'active'}
-
 The dict format is:
     {target string used by the API: internal verb}
-
 This provides a reference set of supported actions, and in the future
 may be used to support renaming these actions.
 """
 
 NOSTATE = None
 """ No state information.
-
 This state is used with power_state to represent a lack of knowledge of
 power state, and in target_*_state fields when there is no target.
 """
 
 ENROLL = 'enroll'
 """ Node is enrolled.
-
 This state indicates that Ironic is aware of a node, but is not managing it.
 """
 
@@ -78,7 +71,6 @@ VERIFYING = 'verifying'
 
 MANAGEABLE = 'manageable'
 """ Node is in a manageable state.
-
 This state indicates that Ironic has verified, at least once, that it had
 sufficient information to manage the hardware. While in this state, the node
 is not available for provisioning (it must be in the AVAILABLE state for that).
@@ -86,7 +78,6 @@ is not available for provisioning (it must be in the AVAILABLE state for that).
 
 AVAILABLE = 'available'
 """ Node is available for use and scheduling.
-
 This state is replacing the NOSTATE state used prior to Kilo.
 """
 
@@ -95,14 +86,12 @@ ACTIVE = 'active'
 
 DEPLOYWAIT = 'wait call-back'
 """ Node is waiting to be deployed.
-
 This will be the node `provision_state` while the node is waiting for
 the driver to finish deployment.
 """
 
 DEPLOYING = 'deploying'
 """ Node is ready to receive a deploy request, or is currently being deployed.
-
 A node will have its `provision_state` set to DEPLOYING briefly before it
 receives its initial deploy request. It will also move to this state from
 DEPLOYWAIT after the callback is triggered and deployment is continued
@@ -114,7 +103,6 @@ DEPLOYFAIL = 'deploy failed'
 
 DEPLOYDONE = 'deploy complete'
 """ Node was successfully deployed.
-
 This is mainly a target provision state used during deployment. A successfully
 deployed node should go to ACTIVE status.
 """
@@ -124,9 +112,7 @@ DELETING = 'deleting'
 
 DELETED = 'deleted'
 """ Node tear down was successful.
-
 In Juno, target_provision_state was set to this value during node tear down.
-
 In Kilo, this will be a transitory value of provision_state, and never
 represented in target_provision_state.
 """
@@ -136,7 +122,6 @@ CLEANING = 'cleaning'
 
 CLEANWAIT = 'clean wait'
 """ Node is waiting for a clean step to be finished.
-
 This will be the node's `provision_state` while the node is waiting for
 the driver to finish a cleaning step.
 """
@@ -146,20 +131,17 @@ CLEANFAIL = 'clean failed'
 
 ERROR = 'error'
 """ An error occurred during node processing.
-
 The `last_error` attribute of the node details should contain an error message.
 """
 
 REBUILD = 'rebuild'
 """ Node is to be rebuilt.
-
 This is not used as a state, but rather as a "verb" when changing the node's
 provision_state via the REST API.
 """
 
 INSPECTING = 'inspecting'
 """ Node is under inspection.
-
 This is the provision state used when inspection is started. A successfully
 inspected node shall transition to MANAGEABLE status.
 """
@@ -189,31 +171,6 @@ POWER_OFF = 'power off'
 
 REBOOT = 'rebooting'
 """ Node is rebooting. """
-
-
-##############
-# Clone states
-##############
-
-CLONE_WAIT = 'clone wait'
-""" Node is waiting for a clone step to be finished.
-
-This will be the node's `clone_state` while the node is waiting for
-the driver to finish a clone step:
-prepare_iscsi_disk and dd whole disk.
-"""
-
-CLONING = 'cloning'
-""" Node is being cloned to configure and upload image. """
-
-CLONE_FAIL = 'clone failed'
-""" Node failed cloning. This requires operator intervention to resolve. """
-
-CLONE_SUCCESS = 'clone success'
-""" Node clone successfully. """
-
-CLONE_ABORT = 'clone abort'
-""" Node is aborted in clone. """
 
 
 #####################
@@ -371,6 +328,35 @@ machine.add_transition(VERIFYING, MANAGEABLE, 'done')
 
 # Verification can fail with setting last_error and rolling back to ENROLL
 machine.add_transition(VERIFYING, ENROLL, 'fail')
+
+
+##############
+# Clone states
+##############
+
+CLONE_VERBS = {
+    'clone': 'clone',
+    'abort': 'abort',
+}
+
+INITIAL = 'initial'
+""" Node is initial before the first clone operation. """
+
+CLONE_WAIT = 'clone wait'
+""" Node is waiting for a clone step to be finished.
+This will be the node's `clone_state` while the node is waiting for
+the driver to finish a clone step:
+prepare_iscsi_disk and dd whole disk.
+"""
+
+CLONING = 'cloning'
+""" Node is being cloned to configure and upload image. """
+
+CLONE_FAIL = 'clone failed'
+""" Node failed cloning. This requires operator intervention to resolve. """
+
+CLONED = 'cloned'
+""" Node clone successfully. """
 
 
 ###########################
