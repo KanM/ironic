@@ -15,18 +15,24 @@ That means clone will follow the flow driven by the actions, which are
 
 The 'faked' state machine of clone:
 
-INITIAL/AVAILABLE --------- > [CLONING] ------ > [CLONE_WAIT] ---+
-   ^   ^           R:clone      | | ^    wait        | |         |
-   |   |                        | | |                | |         |      
-   |   |         done           | | |     resume     | |         |
-   |   +------------------------+ | +----------------+ |fail     |
-   |                              |                    |         |
-   |                              |fail                |         |
-   |                              |                    |         |
-   |                              +--- > CLONE_FAIL < -+         |
-   |                                      |   ^                  |
-   |            R:clone_clean             |   |   R:clone_abort  |
-   +--------------------------------------+   +------------------+
+              INITIAL/AVAILABLE
+                      |
+                      |
+                      v
+CLONED --------- > [CLONING] ------ > [CLONE_WAIT] ---+
+  ^    R:clone      | ^ | ^    wait       |  |        |
+  |                 | | | |               |  |        |
+  |     done        | | | |     resume    |  |        |
+  +-----------------+ | | +---------------+  |fail    |
+                      | |                    |        |
+               R:clone| |fail                |        |
+                      | |                    |        |
+                      | |                    |        |
+                      | v                    |        |
+                   CLONE_FAIL < -------------+        |
+                        ^                             |
+                        |            R:abort          |
+                        +-----------------------------+
 
 * [STATE] indicates an active state. Ironic is doing cloning to the
   node.
@@ -52,6 +58,9 @@ CLONE_WAIT
   copy the content of disk on baremetal node to it.  And it could be abort-
   -able via Ironic's API.
 
+CLONED
+  This means the clone operation of baremetal node is successful.
+
 CLONE_FAIL
   This means the clone operation of baremetal node is failed. It will happen
   either really fail from CLONING/CLONE_WAIT or abort from CLONE_WAIT.
@@ -62,9 +71,5 @@ Description of the requests:
 clone
   Trigger the clone operation of the node.
 
-clone_abort
+abort
   Abort the clone operation when the node is in CLONE_WAIT state.
-
-clone_clean
-  Clean the failed record of clone operation and revert the node to the
-  initial state.

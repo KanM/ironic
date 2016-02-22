@@ -371,3 +371,40 @@ machine.add_transition(VERIFYING, MANAGEABLE, 'done')
 
 # Verification can fail with setting last_error and rolling back to ENROLL
 machine.add_transition(VERIFYING, ENROLL, 'fail')
+
+
+###########################
+# Clone State machine model
+###########################
+
+clone_machine = fsm.FSM()
+
+# Add stable clone states
+clone_machine.add_state(INITIAL, stable=True, **watchers)
+clone_machine.add_state(CLONED, stable=True, **watchers)
+clone_machine.add_state(CLONE_FAIL, stable=True, **watchers)
+
+# Add clone* states
+clone_machine.add_state(CLONING, target=CLONED, **watchers)
+clone_machine.add_state(CLONE_WAIT, target=CLONED, **watchers)
+
+# A node begin clone the first time
+clone_machine.add_transition(INITIAL, CLONING, 'clone')
+
+# Cloning waits on external callbacks
+clone_machine.add_transition(CLONING, CLONE_WAIT, 'wait')
+# Cloning is done successfully
+clone_machine.add_transition(CLONING, CLONED, 'done')
+# Clone is failed, wait for operator intervention
+clone_machine.add_transition(CLONING, CLONE_FAIL, 'fail')
+
+# Redo a new clone operation of the node
+clone_machine.add_transition(CLONED, CLONING, 'clone')
+
+# Redo the previous failed clone operation of the node
+clone_machine.add_transition(CLONE_FAIL, CLONING, 'clone')
+
+# Clone is failed, wait for operator intervention
+clone_machine.add_transition(CLONING_WAIT, CLONE_FAIL, 'fail')
+# Clone is aborted when waiting for a clone step is finished
+clone_machine.add_transition(CLONING_WAIT, CLONE_FAIL, 'abort')
