@@ -191,31 +191,6 @@ REBOOT = 'rebooting'
 """ Node is rebooting. """
 
 
-##############
-# Clone states
-##############
-
-CLONE_WAIT = 'clone wait'
-""" Node is waiting for a clone step to be finished.
-
-This will be the node's `clone_state` while the node is waiting for
-the driver to finish a clone step:
-prepare_iscsi_disk and dd whole disk.
-"""
-
-CLONING = 'cloning'
-""" Node is being cloned to configure and upload image. """
-
-CLONE_FAIL = 'clone failed'
-""" Node failed cloning. This requires operator intervention to resolve. """
-
-CLONE_SUCCESS = 'clone success'
-""" Node clone successfully. """
-
-CLONE_ABORT = 'clone abort'
-""" Node is aborted in clone. """
-
-
 #####################
 # State machine model
 #####################
@@ -371,6 +346,36 @@ machine.add_transition(VERIFYING, MANAGEABLE, 'done')
 
 # Verification can fail with setting last_error and rolling back to ENROLL
 machine.add_transition(VERIFYING, ENROLL, 'fail')
+
+
+##############
+# Clone states
+##############
+
+CLONE_VERBS = {
+    'clone': 'clone',
+    'abort': 'abort',
+}
+
+INITIAL = 'initial'
+""" Node is initial before the first clone operation. """
+
+CLONE_WAIT = 'clone wait'
+""" Node is waiting for a clone step to be finished.
+
+This will be the node's `clone_state` while the node is waiting for
+the driver to finish a clone step:
+prepare_iscsi_disk and dd whole disk.
+"""
+
+CLONING = 'cloning'
+""" Node is being cloned to configure and upload image. """
+
+CLONE_FAIL = 'clone failed'
+""" Node failed cloning. This requires operator intervention to resolve. """
+
+CLONED = 'cloned'
+""" Node clone successfully. """
 
 
 ###########################

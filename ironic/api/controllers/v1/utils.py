@@ -214,6 +214,17 @@ def check_for_invalid_state_and_allow_filter(provision_state):
                 _('Provision state "%s" is not valid') % provision_state)
 
 
+def check_allow_clone(target):
+    """Check if clone operation is allowed.
+
+    Version 1.15 of the API allows filter nodes by provision state.
+    """
+    if target is not None:
+        if (pecan.request.version.minor <
+                versions.MINOR_15_CLONE_OPERATION):
+            raise exception.NotAcceptable()
+
+
 def initial_node_provision_state():
     """Return node state to use by default when creating new nodes.
 

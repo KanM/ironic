@@ -491,19 +491,19 @@ class NodeStatesController(rest.RestController):
         """Set the clone state of the node.
 
         :param node_ident: the UUID or logical name of a node.
-        :param target: The desired clone state of the node.
+        :param target: The desired clone verb of the node.
         :raises: ClientSideError (HTTP 409) if a clone operation is
                  already in progress.
         :raises: InvalidStateRequested (HTTP 400) if the requested target
                  state is not valid or if the node is not power off.
 
         """
-        api_utils.check_allow_clone_verbs(target)
+        api_utils.check_allow_clone(target)
         rpc_node = api_utils.get_rpc_node(node_ident)
         topic = pecan.request.rpcapi.get_topic_for(rpc_node)
 
-        if target not in [ir_states.CLONE_SUCCESS,
-                          ir_states.CLONE_ABORT]:
+        # Check target action is valid
+        if target not in ir_states.CLONE_VERBS:
             raise exception.InvalidStateRequested(
                 action=target, node=node_ident,
                 state=rpc_node.clone_state)
@@ -516,14 +516,37 @@ class NodeStatesController(rest.RestController):
                                             'power_state': node.power_state})
             raise exception.InvalidStateRequested(message=msg)
 
+        # Check NodeLocked and state convert are valid
+        m = ir_states.clone_machine.copy()
+        m.initialize(rpc_node.clone_state)
+        if not m.is_actionable_event(ir_states.VERBS.get(target, target)):
+            # Normally, we let the task manager recognize and deal with
+            # NodeLocked exceptions. However, that isn't done until the RPC
+            # calls below.
+            # In order to main backward compatibility with our API HTTP
+            # response codes, we have this check here to deal with cases where
+            # a node is already being operated on (CLONING or such) and we
+            # want to continue returning 409. Without it, we'd return 400.
+            if rpc_node.reservation:
+                raise exception.NodeLocked(node=rpc_node.uuid,
+                                           host=rpc_node.reservation)
+
+            raise exception.InvalidStateRequested(
+                action=target, node=rpc_node.uuid,
+                state=rpc_node.clone_state)
+
         # Clone
-        if target == ir_states.CLONE_SUCCESS:
+        if target == ir_states.CLONE_VERBS['clone']:
             pecan.request.rpcapi.do_node_clone(pecan.request.context,
                                                rpc_node.uuid, topic)
         # Clone abort
-        else:
+        elif target == ir_states.CLONE_VERBS['abort']:
             pecan.request.rpcapi.do_node_clone_abort(pecan.request.context,
                                                      rpc_node.uuid, topic)
+        else:
+            msg = (_('The requested action "%(action)s" could not be '
+                     'understood.') % {'action': target})
+            raise exception.InvalidStateRequested(message=msg)
 
         # Set the HTTP Location Header
         url_args = '/'.join([node_ident, 'states'])
