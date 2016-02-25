@@ -1,0 +1,33 @@
+
+9.5.126.32 ubuntu passw0rd
+/home/ubuntu/disk-backup
+
+devstack agent_ssh env
+http://9.5.124.22/dashboard
+
+ 
+git clone -b backup https://github.com/KanM/ironic.git
+git clone -b disk-backup https://github.com/Haomeng/ironic-python-agent.git
+ 
+tox -evenv --notest
+
+ironic.conf
+[DEFAULT]
+auth_strategy = none
+[database]
+connection = mysql+pymysql://root:password@127.0.0.1/ironic?charset=utf8
+
+#mysqladmin  -uroot -ppassword create ironic.clone
+#mysql -uroot -ppassword ironic.clone < ironic.mysql.devstack.db
+
+#alter table nodes add clone_state varchar (64);
+#alter table nodes add clone_step varchar (255);
+ 
+#ironic-api --config-file etc/ironic/ironic.conf.sample.clone
+
+curl localhost:6385
+curl -g -i -X GET http://localhost:6385/v1/nodes -H "X-OpenStack-Ironic-API-Version: 1.9" -H "Content-Type: application/json" -H "Accept: application/json"
+
+curl -g -i -X PUT http://localhost:6385/v1/nodes/d2b11aa7-bd7e-44b8-a421-ca9c8b718de7/states/provision/ -d target=clone
+
+
