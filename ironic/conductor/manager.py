@@ -2302,7 +2302,7 @@ class ConductorManager(base_manager.BaseConductorManager):
         if not callback_timeout:
             return
 
-        filters = {'clone_state': states.CLEANWAIT,
+        filters = {'clone_state': states.CLONE_WAIT,
                    'maintenance': False}
         node_iter = self.iter_nodes(filters=filters)
 
