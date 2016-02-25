@@ -2302,21 +2302,26 @@ class ConductorManager(base_manager.BaseConductorManager):
         if not callback_timeout:
             return
 
-        filters = {'clone_state': states.CLONE_WAIT,
+        filters = {'reserved': False,
+                   'clone_state': states.CLONE_WAIT,
                    'maintenance': False}
-        node_iter = self.iter_nodes(filters=filters)
+        sort_key = 'clone_time'
+        node_iter = self.iter_nodes(filters=filters,
+                                    sort_key=sort_key,
+                                    sort_dir='asc')
 
         workers_count = 0
         for node_uuid in node_iter:
             try:
                 with task_manager.acquire(context, node_uuid,
                                           purpose='clone state check') as task:
+                    target_clone_state = task.node.target_clone_state
                     last_error = _("Timeout reached while clone the node. "
                        "Please check if the ramdisk responsible for the "
                        "clone is running on the node.")
                     task.node.last_error = last_error
                     task.process_clone_event('fail',
-                                             target_state='CLONE_FAIL')
+                                             target_state=target_clone_state)
             except exception.NoFreeConductorWorker:
                 break
             except (exception.NodeLocked, exception.NodeNotFound):
