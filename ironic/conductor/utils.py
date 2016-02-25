@@ -398,6 +398,37 @@ def _validate_user_clean_steps(task, user_steps):
         raise exception.InvalidParameterValue('; '.join(errors))
 
 
+def clone_error_handler(e, node, clone_state, target_clone_state):
+    """Set the node's clone states if error occurs.
+
+    This hook gets called upon an exception being raised when spawning
+    the worker to do cloning to a node.
+
+    :param e: the exception object that was raised.
+    :param node: an Ironic node object.
+    :param clone_state: the clone state to be set on the node.
+    :param target_clone_state: the target clone state to be set on the node.
+
+    """
+    if isinstance(e, exception.NoFreeConductorWorker):
+        # NOTE(deva): there is no need to clear conductor_affinity
+        #             because it isn't updated on a failed deploy
+        node.clone_state = clone_state
+        node.target_clone_state = target_clone_state
+        node.last_error = (_("No free conductor workers available"))
+        node.save()
+        LOG.warning(_LW("No free conductor workers available to perform "
+                        "clone on node %(node)s, setting node's "
+                        "clone_state back to %(clone_state)s and "
+                        "target_clone_state to %(target_clone_state)s."),
+                    {'node': node.uuid, 'clone_state': clone_state,
+                     'target_clone_state': target_clone_state})
+
+'''
+# This should be the error handler when in the ongoing clone process
+# instead of the trigger clone action like provisioning.
+# Also need rename this function to separate from the previous one,
+# for the 'clone' is mixed in concept both in action and process.
 def clone_error_handler(task, msg, tear_down_clone=True,
                         set_fail_state=True):
     """Put a failed node in CLONE_FAIL."""
@@ -417,3 +448,4 @@ def clone_error_handler(task, msg, tear_down_clone=True,
 
     if set_fail_state:
         task.process_event('fail', target_state=states.CLONE_FAIL)
+'''

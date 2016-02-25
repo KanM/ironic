@@ -2,7 +2,7 @@ Arch(End-2-End)
 
 1. API
    |_node-clone
-   |_utils(check API version)
+   |_utils-check_allow_clone
    |_else: webapi/reno/version
 
 2. Conductor
@@ -18,7 +18,10 @@ Arch(End-2-End)
    |   |_continue_node_clone
    |   |_do_node_clone_abort
    |_utils
-       |_clone_error_handler
+   |   |_clone_error_handler
+   |   |_another fine-grained clean process error handler is needed-TBD
+   |_task_manager
+       |_ process_clone_event
 
 3. DB
    |_sqlalchemy.alembic.versions(4 upgrade and downgrade)
@@ -41,7 +44,7 @@ Arch(End-2-End)
 5. IPA
 
 6. State
-   |_common.states-Clone states
+   |_common.states-Clone states (Add a new clone state machine)
 
 7. Conf
    |_check_clone_state_interval

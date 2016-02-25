@@ -2124,12 +2124,12 @@ class ConductorManager(base_manager.BaseConductorManager):
                 raise exception.InvalidStateRequested(message=msg)
 
             try:
-                task.process_event(
+                task.process_clone_event(
                     'clone',
                     callback=self._spawn_worker,
                     call_args=(self._do_node_clone, task),
                     err_handler=utils.clone_error_handler,
-                    target_state=states.CLONE_SUCCESS)
+                    target_state=states.CLONED)
             except exception.InvalidState:
                 raise exception.InvalidStateRequested(
                     action='clone', node=node.uuid,
@@ -2158,7 +2158,7 @@ class ConductorManager(base_manager.BaseConductorManager):
                  async task.
         """
         with task_manager.acquire(context, node_id, shared=False,
-                                  purpose='node clone') as task:
+                                  purpose='node clone abort') as task:
             node = task.node
 
             # Check whether the node is in maintenance mode
@@ -2181,15 +2181,15 @@ class ConductorManager(base_manager.BaseConductorManager):
                 raise exception.InvalidStateRequested(message=msg)
 
             try:
-                task.process_event(
-                    'clone_abort',
+                task.process_clone_event(
+                    'abort',
                     callback=self._spawn_worker,
                     call_args=(self._do_node_clone_abort, task),
                     err_handler=utils.clone_error_handler,
                     target_state=states.CLONE_FAIL)
             except exception.InvalidState:
                 raise exception.InvalidStateRequested(
-                    action='clone_abort', node=node.uuid,
+                    action='abort', node=node.uuid,
                     state=node.clone_state)
 
 
@@ -2274,6 +2274,7 @@ class ConductorManager(base_manager.BaseConductorManager):
         LOG.debug("_connect_iSCSI_disk return dev %s" % dev)
         return dev
 
+
     def _configure_iSCSI_disk(self, node, iscsi_disk):
         LOG.debug("_configure_iSCSI_disk called: node=%(node)s, iscsi_disk=%(iscsi_disk)s"
                   % {'node': node, 'iscsi_disk': iscsi_disk})
@@ -2287,7 +2288,6 @@ class ConductorManager(base_manager.BaseConductorManager):
         common_utils.execute(cmd)
         
         
-
     @periodic_task.periodic_task(
         spacing=CONF.conductor.check_clone_state_interval)
     def _check_clonewait_timeouts(self, context):
@@ -2315,7 +2315,8 @@ class ConductorManager(base_manager.BaseConductorManager):
                        "Please check if the ramdisk responsible for the "
                        "clone is running on the node.")
                     task.node.last_error = last_error
-                    task.process_event('fail', target_state='CLONE_SUCCESS')
+                    task.process_clone_event('fail',
+                                             target_state='CLONE_FAIL')
             except exception.NoFreeConductorWorker:
                 break
             except (exception.NodeLocked, exception.NodeNotFound):
