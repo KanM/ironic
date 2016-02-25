@@ -342,7 +342,7 @@ CLONE_VERBS = {
 INITIAL = 'initial'
 """ Node is initial before the first clone operation. """
 
-CLONE_WAIT = 'clone wait'
+CLONING_WAIT = 'clone wait'
 """ Node is waiting for a clone step to be finished.
 This will be the node's `clone_state` while the node is waiting for
 the driver to finish a clone step:
@@ -372,13 +372,13 @@ clone_machine.add_state(CLONE_FAIL, stable=True, **watchers)
 
 # Add clone* states
 clone_machine.add_state(CLONING, target=CLONED, **watchers)
-clone_machine.add_state(CLONE_WAIT, target=CLONED, **watchers)
+clone_machine.add_state(CLONING_WAIT, target=CLONED, **watchers)
 
 # A node begin clone the first time
 clone_machine.add_transition(INITIAL, CLONING, 'clone')
 
 # Cloning waits on external callbacks
-clone_machine.add_transition(CLONING, CLONE_WAIT, 'wait')
+clone_machine.add_transition(CLONING, CLONING_WAIT, 'wait')
 # Cloning is done successfully
 clone_machine.add_transition(CLONING, CLONED, 'done')
 # Clone is failed, wait for operator intervention
