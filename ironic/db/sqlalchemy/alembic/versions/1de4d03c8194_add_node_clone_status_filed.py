@@ -15,8 +15,21 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.add_column('nodes', sa.Column('clone_state', sa.String(length=63),
+    op.add_column('nodes',
+                  sa.Column('clone_state', sa.String(length=15),
+                  nullable=True))
+    op.add_column('nodes',
+                  sa.Column('target_clone_state', sa.String(length=15),
+                  nullable=True))
+    op.add_column('nodes',
+                  sa.Column('clone_step', sa.Text(),
+                  nullable=True))
+    op.add_column('nodes',
+                  sa.Column('clone_time', sa.DateTime(),
                   nullable=True))
 
 def downgrade():
     op.drop_column('nodes', 'clone_state')
+    op.drop_column('nodes', 'target_clone_state')
+    op.drop_column('nodes', 'clone_step')
+    op.drop_column('nodes', 'clone_time')

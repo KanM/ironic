@@ -128,6 +128,8 @@ class Node(Base):
     clean_step = Column(db_types.JsonEncodedDict)
     clone_step = Column(db_types.JsonEncodedDict)
     clone_state = Column(String(15), nullable=True)
+    target_clone_state = Column(String(15), nullable=True)
+    clone_time = Column(DateTime, nullable=True)
 
     raid_config = Column(db_types.JsonEncodedDict)
     target_raid_config = Column(db_types.JsonEncodedDict)

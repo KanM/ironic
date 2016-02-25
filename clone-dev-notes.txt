@@ -20,8 +20,10 @@ connection = mysql+pymysql://root:password@127.0.0.1/ironic?charset=utf8
 #mysqladmin  -uroot -ppassword create ironic.clone
 #mysql -uroot -ppassword ironic.clone < ironic.mysql.devstack.db
 
-#alter table nodes add clone_state varchar (64);
-#alter table nodes add clone_step varchar (255);
+#alter table nodes add clone_state varchar (15);
+#alter table nodes add clone_step text;
+#alter table nodes add target_clone_state varchar (15);
+#alter table nodes add clone_time datetime;
  
 #ironic-api --config-file etc/ironic/ironic.conf.sample.clone
 
