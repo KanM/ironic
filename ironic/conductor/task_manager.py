@@ -191,6 +191,7 @@ class TaskManager(object):
         self.shared = shared
 
         self.fsm = states.machine.copy()
+        self.clone_fsm = states.clone_machine.copy()
         self._purpose = purpose
         self._debug_timer = timeutils.StopWatch()
 
@@ -216,6 +217,9 @@ class TaskManager(object):
 
             self.fsm.initialize(start_state=self.node.provision_state,
                                 target_state=self.node.target_provision_state)
+
+            self.clone_fsm.initialize(start_state=self.node.clone_state,
+                                      target_state=self.node.target_clone_state)
 
         except Exception:
             with excutils.save_and_reraise_exception():
@@ -314,6 +318,7 @@ class TaskManager(object):
         self.driver = None
         self.ports = None
         self.fsm = None
+        self.clone_fsm = None
 
     def _thread_release_resources(self, t):
         """Thread.link() callback to release resources."""
@@ -364,7 +369,7 @@ class TaskManager(object):
         # publish the state transition by saving the Node
         self.node.save()
 
-    '''
+
     def process_clone_event(self, event, callback=None, call_args=None,
                             call_kwargs=None, err_handler=None,
                             target_state=None):
@@ -375,27 +380,27 @@ class TaskManager(object):
         :param call_args: optional \*args to pass to the callback method
         :param call_kwargs: optional \**kwargs to pass to the callback method
         :param err_handler: optional error handler to invoke if the
-                callback fails, eg. because there are no workers available
-        :param target_state: The target clone state for the node.
-        :raises: InvalidState if the event is not allowed.
+               callback fails, eg. because there are no workers available
+               (err_handler should accept arguments node, prev_clone_state,
+               and prev_target_clone_state)
+        :param target_state: if specified, the target clone state for the
+               node. Otherwise, use the target clonestate from the clone_fsm
+        :raises: InvalidState if the event is not allowed by the associated
+                 clone state machine
         """
-        # This may raise InvalidState, if this eventis not allowed in
-        # the current state.
-
-        ## TBD ##
-        # Need verify the transaction between 'FROM' and 'TO'.
+        # Advance the clone state model for the given event. Note that this
+        # doesn't alter the node in any way. This may raise InvalidState,
+        # if this event is not allowed in the current clone state.
+        self.clone_fsm.process_event(event, target_state=target_state)
 
         # stash current states in the error handler if callback is set,
         # in case we fail to get a worker from the pool
         if err_handler and callback:
-            # (Kan)This is the provisiong error handler function
-            # It has the input of 'FROM' and 'TO' of provision states
             self.set_spawn_error_hook(err_handler, self.node,
-                                      self.node.provision_state,
-                                      self.node.target_provision_state)
-        # (Kan) ditto--TBD
-        self.node.clone_state = self.fsm.current_state
-        self.node.target_provision_state = self.fsm.target_state
+                                      self.node.clone_state,
+                                      self.node.target_clone_state)
+        self.node.clone_state = self.clone_fsm.current_state
+        self.node.target_clone_state = self.clone_fsm.target_state
 
         # set up the async worker
         if callback:
@@ -409,7 +414,7 @@ class TaskManager(object):
 
         # publish the state transition by saving the Node
         self.node.save()
-    '''
+
 
     def __enter__(self):
         return self
