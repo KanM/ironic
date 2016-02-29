@@ -332,6 +332,15 @@ def fetch(context, image_href, path, force_raw=False):
     if force_raw:
         image_to_raw(image_href, path, "%s.part" % path)
 
+def create(context, image_info, image_path):
+    image_service = service.get_image_service(image_href,
+                                              context=context)
+    LOG.debug("Using %(image_service)s to create image %(image_href)s." %
+              {'image_service': image_service.__class__,
+               'image_href': image_href})
+
+    image_service.create(image_info, image_path)
+
 
 def image_to_raw(image_href, path, path_tmp):
     with fileutils.remove_path_on_error(path_tmp):
