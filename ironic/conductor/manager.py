@@ -2248,10 +2248,10 @@ class ConductorManager(base_manager.BaseConductorManager):
 
             # Configure the iSCSI disk, like format the configdrive, clean
             # the key files etc.
-            _configure_iSCSI_disk(node, iscsi_disk)
+            dev = _configure_iSCSI_disk(node, iscsi_disk)
 
             # Upload the configured disk to glance
-            _upload_image(img_disk)
+            _upload_image(img_disk, dev)
 
 
     def _connect_iSCSI_disk(self, task):
@@ -2286,8 +2286,11 @@ class ConductorManager(base_manager.BaseConductorManager):
         # remove the config-drive
         cmd = ['echo -e "d\n2\nw\n" | fdisk ', iscsi_disk]
         common_utils.execute(cmd)
-        
-        
+
+    def _upload_image(img_disk, dev):
+        LOG.debug("_upload_image called with %s" % img_disk)
+        images.create(img_disk, dev)   
+ 
     @periodic_task.periodic_task(
         spacing=CONF.conductor.check_clone_state_interval)
     def _check_clonewait_timeouts(self, context):
