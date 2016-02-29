@@ -125,6 +125,16 @@ class BaseImageService(object):
             UTC datetime object.
         """
 
+    @abc.abstractmethod
+    def upload(self, image_info, image_file):
+        """Downloads image to specified location.
+
+        :param image_info: Image reference.
+        :param image_file: File object to write data to.
+        :raises: exception.ImageRefValidationFailed.
+        :raises: exception.ImageUploadFailed.
+        """
+
 
 class HttpImageService(BaseImageService):
     """Provides retrieval of disk images using HTTP."""
@@ -172,6 +182,9 @@ class HttpImageService(BaseImageService):
         except (requests.RequestException, IOError) as e:
             raise exception.ImageDownloadFailed(image_href=image_href,
                                                 reason=e)
+
+    def download(self, image_info, image_file):
+        pass
 
     def show(self, image_href):
         """Get dictionary of image properties.
