@@ -177,8 +177,16 @@ conductor_opts = [
                       'state. Set to 0 to disable timeout.')),
 
     cfg.IntOpt('check_clone_state_interval',
+               default=60,
+               help=_('Interval between checks of clone timeouts, '
+                      'in seconds' )),
+
+    cfg.IntOpt('clone_callback_timeout',
                default=1800,
-               help=_('interval of checking clone state' )),
+               help=_('Timeout (seconds) to wait for a callback from the '
+                      'ramdisk doing the clone. If the timeout is reached '
+                      'the node will be put in the "CLONE_FAIL" clone state. '
+                      'Set to 0 to disable timeout.')),
 ]
 CONF = cfg.CONF
 CONF.register_opts(conductor_opts, 'conductor')
