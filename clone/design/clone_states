@@ -6,11 +6,11 @@ For the clone is even in concept of provisioning, here use the second
 one in design.
 
 
-Although the diagram is like the state machine of provisioning state,
-here the realization of clone will not use the state machine type,
-while the transactions among the clone states imply the work flow.
-That means clone will follow the flow driven by the actions, which are
-"clone", "clone_abort" and "clone_clean".
+The design introduces a new state machine like provisionig state into
+clone work flow, which is called clone state machine. The work flow of
+the clone operations are drivern by the clone state associated with
+the actions like "clone", "clone_abort" and "clone_clean". And the
+clone event is processed mainly by the function in task_manager.
 
 
 The 'faked' state machine of clone:
