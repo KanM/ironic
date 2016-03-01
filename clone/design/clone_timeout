@@ -1,0 +1,46 @@
+==============================================
+Timeout in the progress of the clone procedure
+==============================================
+
+Static Method
+-------------
+Now, the implementation uses static method, which means the timeout
+parameters are set in configuration file. If users want to change,
+the parameters should be changed firstly, and then restart the related
+service (ironic-conductor).
+1. The clone wait timeout periodic check:
+    A reference about deploy timeout: https://review.openstack.org/#/c/72395/
+    
+    The realization in clone:
+    https://github.com/openstack/ironic/commit/d849b2cd19291c9fd4b45befee66222ba01e2781
+    
+    The clean wait timeout is a periodic check task. There are two parameters
+    used in the check operation:
+    1) check_clone_state_interval:
+       It is the interval between checks of clone timeouts in seconds.
+    2) clone_callback_timeout:
+       It is the timeouts in seconds to wait for a callback from the
+       ramdisk (like IPA) doing the clone. As the main work of ramdisk
+       is to get iSCSI disk and copy the the baremetal disk to it, which
+       is in the 'CLONE_WAIT' state, if this timeout is reached, the node
+       will be put into the 'CLONE_FAIL' state.
+
+2. The cloning timeout check:
+     This is the timeout check when the node is in 'CLONING' state, which
+     means that the node is doing clone work on conductor side. That are:
+     1) get the iSCSI disk who has the baremetal node disk information used
+        in clone wait.
+     2) and then config the disk partition.
+     3) upload to glance if needed.
+     This might also be realized using the clone wait way, not supported now.
+
+
+Dynamic Method
+--------------
+Another thought about how to realize the timeout using dynamic method:
+Make an integration with ironic-inspector, and track the clone process considering
+the I/O of disk and throughput of network at the same time. This need a further
+investigation.
+
+
+For now, the static method is used.
