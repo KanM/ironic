@@ -1,0 +1,54 @@
+============================
+About the 'CLONE' in concept
+============================
+
+1. It is an operation
+2. It is an event in work flow
+
+Make a comparision with CLEAN
+-----------------------------
+CLEAN* is the trigger while the 'clean' is an event in the state machine
+of provision.
+The operation is started by changing the provision state, it corresponds
+to the 'provisioning_error_handler' for error recycle.
+The clean is executed as an event following the fsm principle within
+provison, it correspnds to the 'cleaning_error_handler' for error recycle.
+
+A reference about the NodeStatesController class in node.py on API level
+------------------------------------------------------------------------
+NodeStatesController
+ |_get
+ |_raid
+ |_power
+ |_provision___active/rebuild -- do_node_deploy
+ |           |_deleted -- do_node_tear_down
+ |           |_inspect -- inspect_hardware
+ |           |_clean -- do_node_clean (for manual cleaning)
+ |           |_else -- do_provisioning_action (automated cleaning involved)
+ |_[clone]
+
+
+
+Reflect to CLONE
+----------------
+So, the 'CLONE' should always like this to seperate from the concept level.
+
+For CLONE, the design of separating operation and event is:
+
+1. Add a 'target_clone_state' property in node.
+    With clone state machine, all the clone state changes are triggered by
+    the related clone command from API, and the conductor.manager will use
+    the state to track the clone work flow backstage.
+
+2. Make two error handler functions for two different levels.
+    1) clone_error_handler for operation level
+       This hook gets called upon an exception being raised when spawning
+       the worker to do cloning to a node.
+       This function is used in the process_clone_event, which is used in
+       conductor.manager mainly.
+
+    2) Another error handler function for event level
+       This should be the error handler when in the ongoing clone process
+       instead of the trigger clone action like provisioning.
+       For now, this function is realized and commented. Should be renamed
+       to separate from the previous one and used in the clone event process.
