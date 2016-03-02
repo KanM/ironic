@@ -14,16 +14,6 @@ Under discussed:
    https://review.openstack.org/#/c/204162/
 
 
-Q: What is the releationship of the 'maintenance' for the clone?
-   Should the the process of clone consider the 'maintenance' check in code like clean?
-   For now, I think the 'maintenance' should be checked, here is a reference of the 'maintenance' bp:
-   https://bugs.launchpad.net/ironic/+bug/1260099
-   There is a clue like:
-      It should not prevent the admin from doing such things as:
-      ...
-      - [future] booting into a recovery or utility ramdisk, eg. to triage the hardware fault
-   So, I think the check is needed.
-
 Reference about the CLEANWAIT:
 
 When node is in CLEANWAIT it means that the ramdisk running on the node is doing some work and it could be abort-able via Ironic's API.
