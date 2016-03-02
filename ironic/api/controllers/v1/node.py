@@ -513,7 +513,7 @@ class NodeStatesController(rest.RestController):
             msg = (_('The requested action "%(action)s" could not be '
                      'done when the power state of the node is '
                      '"(power_state)".') % {'action': target,
-                                            'power_state': node.power_state})
+                                            'power_state': rpc_node.power_state})
             raise exception.InvalidStateRequested(message=msg)
 
         # Check NodeLocked and state convert are valid
