@@ -1,0 +1,38 @@
+====================================================
+The releationship of the 'maintenance' for the clone
+====================================================
+
+The maintenance introduction
+----------------------------
+The 'maintenance' is introduced in Icehouse release of Ironic.
+The reference:
+https://bugs.launchpad.net/ironic/+bug/1260099
+
+Maintenance is used to take a node out of service temporarily.
+From the description of the bp, maintenance-mode should only
+prevent certain actions like deploying on the maintenance node.
+It should not prevent the admin from doing such things as:
+- accessing serial console
+- managing power state
+- deleting an instance
+- [future] updating firmware
+- [future] booting into a recovery or utility ramdisk,
+           eg. to triage the hardware fault
+
+The maintenance check in clone
+------------------------------
+Considering the clone operation is parallel with provision,
+the maintenance should also be checked in clone process like
+some provision processes do, such as deploy, rebuild and manual
+clean.
+
+Take the previous situation 'booting into a recovery or utility
+ramdisk, eg. to triage the hardware fault' as the the clue, clone
+also needs ramdisk to do some work in the process, like IPA copy
+baremetal disk to iSCSI disk, which will confilict with the action
+maintenance mode might does. So the maintenance check should be
+done in clone process.
+
+PS: Once it is confirmed that the maintenance has nothing to do
+    with clone, the maintenance check related to clone could be
+    removed.
