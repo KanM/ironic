@@ -1,0 +1,52 @@
+==========================
+Provisioning State Machine
+==========================
+
+The introduction of Ironic Provisioning State Machine
+-----------------------------------------------------
+Reference:
+https://github.com/openstack/ironic-specs/blob/master/specs/kilo-implemented/new-ironic-state-machine.rst
+    https://review.openstack.org/#/c/139215/
+https://bugs.launchpad.net/ironic/+bug/1465248
+    https://review.openstack.org/#/c/191985/
+
+The related code files:
+1) ironic/common/fsm.py
+2) ironic/common/states.py
+
+Ironic use automaton.machines.FiniteMachine as the base class of the
+provisioning state machine class FSM (short for Finite State Machone).
+The automaton is an oslo lib, the link of this lib:
+https://github.com/openstack/automaton
+Source code for automaton.machines:
+http://docs.openstack.org/developer/automaton/_modules/automaton/machines.html
+
+When realizing the provisioning state, firstly generate a fsm object.
+The following operations are all acted on this object.
+There are two major functions used for fsm object:
+1) add_state
+    Used to register the states.
+2) add_transition
+    Used to register the transition 'from', 'to' and 'event'.
+
+After all provisioning states and transitions been registered into the
+fsm object, the demonstrate could be like this diagram:
+http://docs.openstack.org/developer/ironic/_images/states.svg
+
+Usage of provisionig state machine
+----------------------------------
+The related code files:
+1) ironic/conductor/task_manager.py
+    a. __init__
+        * copy the state machine object instantiated in states.py
+          as fsm
+    b. process_event:
+        Process the given event for the task's current state.
+        * Using the fsm object to check whether the event is allowed in
+          the current state.
+        * Spawn an asynchronous worker to call the callback functions,
+          this is where the real work happens.
+        * Publish the state transition by saving the node object.
+2) ironic/conductor/manager.py
+    Mainly call the process_event function in each case related to the
+    event, such as deploy, clean etc.
