@@ -1,3 +1,9 @@
+===========
+CLONE State
+===========
+
+Ways of realization
+-------------------
 There are two ways of realizing the states of clone:
 1. Adding into the provisioning state, which is the current state
    machine fsm.
@@ -5,13 +11,13 @@ There are two ways of realizing the states of clone:
 For the clone is even in concept of provisioning, here use the second
 one in design.
 
-
+Clone State Machine
+-------------------
 The design introduces a new state machine like provisionig state into
 clone work flow, which is called clone state machine. The work flow of
 the clone operations are drivern by the clone state associated with
 the actions like "clone", "clone_abort" and "clone_clean". And the
 clone event is processed mainly by the function in task_manager.
-
 
 The 'faked' state machine of clone:
 
@@ -42,8 +48,8 @@ CLONED --------- > [CLONING] ------ > [CLONE_WAIT] ---+
   initiate a transition out of a stable state.
 
 
-Description of the states:
-
+Description of the states
+-------------------------
 INITIAL/AVAILABLE
   This is the initial state of a node before clone.
 
@@ -66,8 +72,8 @@ CLONE_FAIL
   either really fail from CLONING/CLONE_WAIT or abort from CLONE_WAIT.
 
 
-Description of the requests:
-
+Description of the requests
+---------------------------
 clone
   Trigger the clone operation of the node.
 
