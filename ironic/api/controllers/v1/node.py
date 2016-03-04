@@ -314,6 +314,7 @@ class NodeStatesController(rest.RestController):
         'power': ['PUT'],
         'provision': ['PUT'],
         'raid': ['PUT'],
+        'clone': ['PUT'],
     }
 
     console = NodeConsoleController()
