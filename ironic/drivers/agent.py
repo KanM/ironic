@@ -123,6 +123,7 @@ class AgentAndSSHDriver(base.BaseDriver):
         self.inspect = inspector.Inspector.create_if_enabled(
             'AgentAndSSHDriver')
         self.console = ssh.ShellinaboxConsole()
+        self.clone = agent.AgentClone()
 
 
 class AgentAndVirtualBoxDriver(base.BaseDriver):

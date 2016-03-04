@@ -186,6 +186,8 @@ class Connection(api.Connection):
                      (datetime.timedelta(
                          seconds=filters['inspection_started_before'])))
             query = query.filter(models.Node.inspection_started_at < limit)
+        if 'clone_state' in filters:
+            query = query.filter_by(clone_state=filters['clone_state'])
 
         return query
 
@@ -254,6 +256,8 @@ class Connection(api.Connection):
             values['power_state'] = states.NOSTATE
         if 'provision_state' not in values:
             values['provision_state'] = states.ENROLL
+        if 'clone_state' not in values:
+            values['clone_state'] = states.INITIAL
 
         node = models.Node()
         node.update(values)

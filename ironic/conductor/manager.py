@@ -2149,8 +2149,7 @@ class ConductorManager(base_manager.BaseConductorManager):
 
         :param task: a TaskManager instance with an exclusive lock on its node
         """
-
-        task.driver.clone_baremetal_disk(task);
+        task.driver.clone.clone_baremetal_disk(task);
 
 
     def do_node_clone_abort(self, context, node_id):
@@ -2322,7 +2321,7 @@ class ConductorManager(base_manager.BaseConductorManager):
                                     sort_dir='asc')
 
         workers_count = 0
-        for node_uuid in node_iter:
+        for node_uuid, driver in node_iter:
             try:
                 with task_manager.acquire(context, node_uuid,
                                           purpose='clone state check') as task:
