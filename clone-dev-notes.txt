@@ -1,4 +1,23 @@
 
+steps
+==================
+1. create devstack env
+2. git clone -b backup https://github.com/KanM/ironic.git
+3. tox -evenv --notest
+4. change mysql: 
+   mysql -uroot -ppassword ironic
+   alter table nodes add clone_state varchar (15);
+   alter table nodes add target_clone_state varchar (15);
+   alter table nodes add clone_step text;
+   alter table nodes add clone_time datetime;
+5. cd ironic;source .tox//venv/bin/activate
+   ironic-api --config-file=/etc/ironic/ironic.conf
+   ironic-conductor --config-file=/etc/ironic/ironic.conf
+6. curl -g -i -X PUT http://localhost:6385/v1/nodes/$node/states/clone -H "X-OpenStack-Ironic-API-Version: 1.15"  -d target=clone
+
+
+notes
+==================
 9.5.126.32 ubuntu passw0rd
 /home/ubuntu/disk-backup
 
