@@ -577,7 +577,10 @@ class AgentClone(base.CloneInterface):
     """"""
 
     def prepare_clone(self, task):
-        pass
+        if CONF.agent.manage_agent_boot: 
+            ramdisk_opts = deploy_utils.build_agent_options(task.node)
+            task.driver.boot.prepare_ramdisk(task, ramdisk_opts)
+        manager_utils.node_power_action(task, states.REBOOT)
 
     def clone_baremetal_disk(self, task):
         """"""

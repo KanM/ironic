@@ -2149,7 +2149,8 @@ class ConductorManager(base_manager.BaseConductorManager):
 
         :param task: a TaskManager instance with an exclusive lock on its node
         """
-        task.driver.clone.clone_baremetal_disk(task);
+        task.driver.clone.prepare_clone(task)
+        task.driver.clone.clone_baremetal_disk(task)
 
 
     def do_node_clone_abort(self, context, node_id):
