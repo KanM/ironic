@@ -577,19 +577,23 @@ class AgentClone(base.CloneInterface):
     """"""
 
     def prepare_clone(self, task):
+        LOG.debug("AgentClone.prepare_clone called...") 
         if CONF.agent.manage_agent_boot: 
             ramdisk_opts = deploy_utils.build_agent_options(task.node)
             task.driver.boot.prepare_ramdisk(task, ramdisk_opts)
         manager_utils.node_power_action(task, states.REBOOT)
+        LOG.debug("AgentClone.prepare_clone called over")
 
     def clone_baremetal_disk(self, task):
         """"""
+        LOG.debug("AgentClone.clone_baremetal_disk called...")
         client = agent_client.AgentClient()
         node = task.node
         iscsi_ip = task.node.driver_info.get('iscsi_ip')
         iqn = task.node.driver_info.get('iqn')
         lun = task.node.driver_info.get('lun')
         client.clone_disk(node, iscsi_ip, iqn, lun)
+        LOG.debug("AgentClone.clone_baremetal_disk called over")
 
     def tear_down_clone():
         """"""
