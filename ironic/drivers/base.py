@@ -993,12 +993,20 @@ class CloneInterface(object):
     """Interface for clone disk related actions."""
     interface_type = 'clone'
 
+
+    @abc.abstractmethod
+    def prepare_clone(self, task):
+        """
+        """
+        pass
+
     @abc.abstractmethod
     def clone_baremetal_disk(self, task):
         """
         """
         pass
 
+    @abc.abstractmethod
     def tear_down_clone(self, task):
         """
         """
