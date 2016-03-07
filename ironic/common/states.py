@@ -379,6 +379,7 @@ clone_machine.add_transition(INITIAL, CLONING, 'clone')
 
 # Cloning waits on external callbacks
 clone_machine.add_transition(CLONING, CLONE_WAIT, 'wait')
+clone_machine.add_transition(CLONE_WAIT, CLONING, 'resume')
 # Cloning is done successfully
 clone_machine.add_transition(CLONING, CLONED, 'done')
 # Clone is failed, wait for operator intervention
