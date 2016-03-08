@@ -1,40 +1,34 @@
 Under discussed:
 
-1. How to upload from iSCSI to the glance? Now seems like only the local file is allowed.
+1. How to upload from iSCSI to the glance? 
+   Have left the interface to make a further progress, but for now
+   would not implement to check the Cinder status. Would not need
+   upload to Glance when the Cinder volume is allowded with Ironic.
 
-2. Windows & Linux & etc extension. A new plugin in the conductor side? Maybe a new directory named 'extension', just like 'drivers'.
+2. Windows & Linux & etc extension.
+   A new plugin in the conductor side? 
+   Maybe a new directory named 'extension', just like 'drivers'.
+   For an early version, would not realize this.
 
 3. Optional---The progress of the clone procedure.
    Please refer to the 'clone_timeout' doc.
 
-4. Get current clone step. No matter whether having a seperate API, or having a standalone 'clone_step' colume in node table.
-   Prefer the latter one.
+4. Get current clone step.
+   No matter whether having a seperate API, or having a standalone
+   'clone_step' colume in node table.
+   Have added a column 'clone_step' in node to track the ongoing step
+   of the clone provess.
 
-5. Cancel. Should be needed. Maybe can get some inspirations from the 'nova force-delete', or this spec may be helpful.
+5. Cancel.
+   Should be needed. Maybe can get some inspirations from the
+   'nova force-delete', or this spec may be helpful.
    https://review.openstack.org/#/c/204162/
-
-
-Reference about the CLEANWAIT:
-
-When node is in CLEANWAIT it means that the ramdisk running on the node is doing some work and it could be abort-able via Ironic's API.
-When the conductor is doing some work it should be at CLEANING state, which should be periodically checked to see if the conductor doing the work still up and running.
-
-	1. bug 1455825.https://bugs.launchpad.net/ironic/+bug/1455825
-	2. some github code, focus on the conductor.https://github.com/openstack/ironic/commit/795b5e37caddf375f92248cbae084b8a20dccd52
-	3. state spec.https://review.openstack.org/#/c/200521/
-	4. add CLEANWAIT state:https://review.openstack.org/#/c/200152/
-	5. allow CLEANWAIT abort.https://review.openstack.org/#/c/201552/
-           The client has no code change;
-           API changes provisioning state check with the newly added CLEANWAIT;
-           Conductor.manager changes the 'do_provisioning_action' to apply the changes upstairs, also will call the '_do_clean_abort' when in CLEANWAIT branch;
-	6. IPA response operation code.https://review.openstack.org/#/c/202137/
+   This has not been merged, just a reference.
+   But for 'abort' operation, we have an API left now to get node out of
+   CLONE_WAIT state.
 
 
 New questions when comparing to the CLEAN:
 1. The clean pipeline has a validate in power, what for? Find it in code.
 2. How is the continue_node_clean be used? Is it called like?
    IPA-->vendor_passthru-->API-->conductor.rpcapi-->conductor.manager
-
-New clues in CLEAN:
-1. do_node_clean is used in the manual cleaning procedure, and it will be exposed to the API by a under review patch.
-2. _do_node_clean is used in the automated cleaning procedure, it is triggered in the provision or tear_down.

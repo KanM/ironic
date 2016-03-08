@@ -65,5 +65,11 @@ Code update:
         |    https://review.openstack.org/#/c/200152/
         |_Allow abort for CLEANWAIT states
         |    https://review.openstack.org/#/c/201552/
+        |    |_The client has no code change;
+        |    |_API changes provisioning state check with the newly added
+        |    | CLEANWAIT;
+        |    |_Conductor.manager changes the 'do_provisioning_action' to
+        |      apply the changes upstairs,
+        |      also will call the '_do_clean_abort' when in CLEANWAIT branch.
         |_Make the erase_devices clean step abortable
              https://review.openstack.org/#/c/202137/
