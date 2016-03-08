@@ -1,0 +1,69 @@
+===================
+CLEANWAIT and Abort
+===================
+
+Why need CLEANWAIT
+------------------
+Sometimes the node got into a state where Ironic believed cleaning was in
+progress, but the node was actually booted into the instance (from local
+disk). While in this situation, there is no way to manage the node via
+Ironic.
+The only way out was a manual reboot of the hardware, outside of Ironic.
+So, in order to make the node manageable, especially abortable in the above
+situation, add a new state named CLEANWAIT and enable abort operation when
+node in this state.
+
+CLONEWAIT and CLONING
+---------------------
+The cleaning should be composed of CLEANWAIT and CLEANING states just like
+the deploy.
+
+    CLEANWAIT:
+        When node is in this state, it means that the ramdisk running on
+        the node is doing some work and it could be abort-able via Ironic's
+        API. It is async.
+    CLEANING:
+        When the conductor is doing some work it should be at CLEANING state,
+        which should be periodically checked to see if the conductor doing the
+        work still up and running. It is sync.
+
+Clone Abort
+-----------
+Allow a node could be aborted when in CLEANWAIT state.
+
+There is a @clean_step decorator, by adding a parameter named "abortable",
+We can get the current clean_step from node.clean_step and check whether we
+can or not abort the operation when the request to abort comes in. By default
+this parameter defaults to False since a clean step could potentially brick
+a machine so we better make it explicit.
+
+If the clean step is abortable, the process of aborting will happen
+immediately; if the clean step is not abortable the abortion will happen
+as soon as the clean step is done. If a clean step is marked to have the
+abortion done after its completion but it is the final clean step in the
+cleaning operation the cleaning process will just finish successfully.	
+
+Abort in IPA when CLONEWAIT
+---------------------------
+By updating the 'get_clean_steps' method to make the erase_devices step
+abortable. Erasing devices is something that can be cancelled without
+damaging the machine.
+When a clean step is aborted the provision state of the Ironic node
+will go to CLEANFAIL state. The operator can then do what is needed to
+fix the problem (i.e network booting issues) and restart the cleaning
+later on.
+
+Reference
+---------
+Provisioning state machine design update:
+    Update the new state machine spec with CLEANWAIT
+        https://review.openstack.org/#/c/200521/
+
+Code update:
+    https://bugs.launchpad.net/ironic/+bug/1455825
+        |_Add CLEANWAIT state
+        |    https://review.openstack.org/#/c/200152/
+        |_Allow abort for CLEANWAIT states
+        |    https://review.openstack.org/#/c/201552/
+        |_Make the erase_devices clean step abortable
+             https://review.openstack.org/#/c/202137/
