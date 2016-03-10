@@ -344,8 +344,7 @@ class BaseAgentVendor(base.VendorInterface):
                           'not taking any action.', {'node': node.uuid})
                 return
             elif node.clone_state in (stetes.CLONE_WAITE, states.CLONING):
-                # call notify_conductor_resume_clone
-                pass
+                self.continue_clone(task, **kwargs)
             elif (node.provision_state == states.DEPLOYWAIT and
                   not self.deploy_has_started(task)):
                 msg = _('Node failed to get image for deploy.')

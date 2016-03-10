@@ -572,6 +572,16 @@ class AgentRAID(base.RAIDInterface):
         task.node.raid_config = {}
         task.node.save()
 
+    @task_manager.require_exclusive_lock
+    def continue_clone(self, task, **kwargs):
+        task.process_event('resume')
+        node = task.node
+        LOG.debug('Continuing clone for node %(node)s',
+                  {'node': node.uuid})
+
+        task.driver.clone.clone_baremetal_disk(task)
+        task.process_event('wait')
+
 
 class AgentClone(base.CloneInterface):
     """"""

@@ -67,6 +67,7 @@ from ironic.common import utils as common_utils
 from ironic.conductor import base_manager
 from ironic.conductor import task_manager
 from ironic.conductor import utils
+from ironic.drivers.modules import deploy_utils
 from ironic import objects
 from ironic.objects import base as objects_base
 
@@ -2149,9 +2150,16 @@ class ConductorManager(base_manager.BaseConductorManager):
 
         :param task: a TaskManager instance with an exclusive lock on its node
         """
-        task.driver.clone.prepare_clone(task)
-        task.driver.clone.clone_baremetal_disk(task)
+        
+        #task.driver.clone.prepare_clone(task)
+        #task.driver.clone.clone_baremetal_disk(task)
 
+        LOG.debug("_do_node_clone called...") 
+        if CONF.agent.manage_agent_boot: 
+            ramdisk_opts = deploy_utils.build_agent_options(task.node)
+            task.driver.boot.prepare_ramdisk(task, ramdisk_opts)
+        utils.node_power_action(task, states.REBOOT)
+        LOG.debug("_do_node_clone called over")
 
     def do_node_clone_abort(self, context, node_id):
         """RPC method to abort an ongoing operation.
