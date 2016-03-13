@@ -1,0 +1,113 @@
+==================
+Automated Cleaning
+==================
+
+Reference
+---------
+
+1. Implement Cleaning States
+    https://review.openstack.org/153444
+
+    common.states: New Clean related state and fsm
+    conductor.manager:
+        1)refactor do_node_tear_down
+        2)add do_node_clean
+        3)related provisioning state logic
+
+2. Implement execute clean steps 
+    https://review.openstack.org/155561
+    
+    conf: Add a clean configuration in conf
+    api.node: Add clean_steps interface in Node.sample
+    conductor.manager:
+        1)clean_nodes option
+        2)clean priority
+        3)continue_node_clean——RPC related/async
+        4)refactor _do_node_clean to involve clean priority
+        5)_do_next_clean_step
+        6)cleaning_error_handler
+        7)_step_key——sort by priority
+        8)_get_cleaning_steps——get sorted cleaning steps by priority for a node
+        9)set_node_cleaning_steps
+    rpcapi:1.26version——continue_node_clean
+    db.sqlalchemy.alembic: upgrade/downgrade of node table for clean_steps clolumn
+    db.sqlalchemy.model: add clean_steps column
+    object.node:1.11version——add clean_steps fields
+    driver.base——interface:
+        Base:
+            1)get_clean_steps
+            2)execute_clean_steps
+        Deploy:
+            1)prepare_cleaning
+            2)tear_down_cleaning
+
+3. Implement Cleaning in DriverInterfaces 
+    https://review.openstack.org/157208
+
+    Driver.base:
+        BaseInterface:
+            1)__new__
+            2)get_clean_steps
+            3)excute_clean_step
+        deploy/Power/Managerment inherit from BaseInterface
+        clean_step decorator with priority
+
+4. Implement cleaning/zapping for the agent driver 
+    https://review.openstack.org/161453
+
+    Ironic agent driver.
+        conf:
+            1)agent_erase_devices_priority
+            2)cleaning_network_uuid
+        dhcp_factory: Add neutron ports to update dhcp
+        dhcp.neutron:
+            1)update dhcp with vifs(the same as neutron ports in dhcp_factory)
+            2)create_cleaning_ports
+            3)delete_cleaning_ports
+        drivers.modules.agent:
+            1)Add agent_erase_devices_priority configuration
+            2)Refactor deploy with _do_pxe_boot
+            3)Refactor prepare with _prepare_pxe_boot
+            4)Refactor clean_up with _clean_up_pxe
+            5)get_clean_steps
+            6)excute_clean_steps
+            7)prepare_cleaning
+            8)tear_down_cleaning
+        drivers.modules.agent_base_vendor:
+            1)_notify_conductor_resume_clean——resume
+            2)continue_cleaning
+            3)Add cleaning related provisioning state check in heartbeat
+            4)_get_completed_cleaning_command
+        drivers.modules.agent_client:
+            1)get_clean_steps
+            2)execute_clean_steps
+        drivers.modules.deploy_utils:
+            1)_get_agent_client
+            2)agent_get_clean_steps
+
+5. Add support for cleaning in Ironic driver (Nova) 
+    https://review.openstack.org/#/c/161474
+
+    Nova virt driver.
+
+6. Use task.spawn_after to maintain lock during cleaning 
+    https://review.openstack.org/165528
+
+    By using the task_spawn_after, continue_node_cleaning can still hold the
+    lock in the cleaning cycle.
+
+7. Prevent power actions on node in cleaning 
+    https://review.openstack.org/169510
+
+    Add a logic check in api.node to prevent the power operation when in
+    cleaning cycle.
+
+8. Add documentation for Cleaning 
+    https://review.openstack.org/168189
+
+    Add deploy.cleaning sheet.
+
+9. Update docs: No power actions during cleaning 
+    https://review.openstack.org/169514
+
+    Describe why power operation is not allowed in cleaning cycle.
