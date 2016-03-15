@@ -674,5 +674,9 @@ class BaseAgentVendor(base.VendorInterface):
 
     def continue_clone(self, task, **kwargs):
         LOG.debug("continue_clone is called")
-        task.process_event('wait') 
+        #task.process_event('wait') 
+        iscsi_ip = task.node.driver_info.get('iscsi_ip')
+        iqn = task.node.driver_info.get('iqn')
+        lun = task.node.driver_info.get('lun')
+        self._client.clone_disk(task.node, iscsi_ip, iqn, lun)
         LOG.debug("continue_clone called over")
