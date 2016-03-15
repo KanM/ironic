@@ -343,7 +343,7 @@ class BaseAgentVendor(base.VendorInterface):
                 LOG.debug('Heartbeat from node %(node)s in maintenance mode; '
                           'not taking any action.', {'node': node.uuid})
                 return
-            elif node.clone_state in (stetes.CLONE_WAITE, states.CLONING):
+            elif node.clone_state in (states.CLONE_WAITE, states.CLONING):
                 self.continue_clone(task, **kwargs)
             elif (node.provision_state == states.DEPLOYWAIT and
                   not self.deploy_has_started(task)):
