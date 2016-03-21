@@ -8,3 +8,8 @@ iscsiadm: CommandFilter, iscsiadm, root
 # ironic/common/utils.py
 mount: CommandFilter, mount, root
 umount: CommandFilter, umount, root
+
+# ironic/common/images.py
+virt-sysprep: CommandFilter, virt-sysprep, root
+
+

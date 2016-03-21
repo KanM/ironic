@@ -573,3 +573,12 @@ def _mount_deploy_iso(deploy_iso, mountdir):
     # present in deploy iso. This path varies for different OS vendors.
     # e_img_rel_path: is required by mkisofs to generate boot iso.
     return uefi_path_info, e_img_rel_path, grub_rel_path
+
+
+def reset_image(img):
+    # run "virt-sysprep" to reset images
+    utils.execute("virt-sysprep",'-a', img,
+                  run_as_root=True,
+                  check_exit_code=[0])
+    # remove 2nd configdrive partition
+    # utils.execute("echo -e i'd\n2\nw\n' | fdisk %s" % img)

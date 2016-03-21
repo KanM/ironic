@@ -628,9 +628,20 @@ class AgentClone(base.CloneInterface):
         LOG.debug("copy disk from %(from)s, to %(to)s ..." % 
                     {"from": ipa_iscsi_disk_dev, "to": backup_iscsi_disk_dev})
         ironic_utils.dd(ipa_iscsi_disk_dev, backup_iscsi_disk_dev)
-		
+       
+        # logout ipa iscsi
+        deploy_utils.logout_iscsi('10.1.0.4', 3260, 'clone_iqn')
+
         # reset disk image
-		#_reset_disk_image(backup_iscsi_disk_dev)
+        images.reset_image(backup_iscsi_disk_dev)
+
+        # logout backup iscsi
+        deploy_utils.logout_iscsi('10.1.0.4', 3260, 'clone_iqn')
+ 
+        # remove pxe configuration and reboot from local disk
+        task.driver.boot.clean_up_ramdisk(task)
+        manager_utils.node_power_action(task, states.REBOOT)
+		
         LOG.debug("AgentClone.clone_baremetal_disk called over")
 
     def tear_down_clone():

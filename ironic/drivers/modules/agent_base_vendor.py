@@ -689,4 +689,5 @@ class BaseAgentVendor(base.VendorInterface):
         except Exception as e:
             task.process_clone_event('fail')
             raise e
+        task.process_clone_event('done')
         LOG.debug("continue_clone called over")
