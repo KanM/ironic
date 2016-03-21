@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import excutils
@@ -35,6 +37,7 @@ from ironic.drivers import base
 from ironic.drivers.modules import agent_base_vendor
 from ironic.drivers.modules import agent_client
 from ironic.drivers.modules import deploy_utils
+from ironic_lib import utils as ironic_utils
 
 agent_opts = [
     cfg.StrOpt('agent_pxe_append_params',
@@ -598,11 +601,36 @@ class AgentClone(base.CloneInterface):
         """"""
         LOG.debug("AgentClone.clone_baremetal_disk called...")
         client = agent_client.AgentClient()
-        node = task.node
+        #node = task.node
+        #iscsi_ip = task.node.driver_info.get('iscsi_ip')
+        #iqn = task.node.driver_info.get('iqn')
+        #lun = task.node.driver_info.get('lun')
+        #client.clone_disk(node, iscsi_ip, iqn, lun)
+        # login backup iscsi disk
         iscsi_ip = task.node.driver_info.get('iscsi_ip')
-        iqn = task.node.driver_info.get('iqn')
-        lun = task.node.driver_info.get('lun')
-        client.clone_disk(node, iscsi_ip, iqn, lun)
+        iscsi_iqn = task.node.driver_info.get('iscsi_iqn')
+        iscsi_lun = task.node.driver_info.get('iscsi_lun') 
+        iscsi_port = task.node.driver_info.get('iscsi_port') 
+        deploy_utils.login_iscsi(iscsi_ip, iscsi_port, iscsi_iqn, iscsi_lun)
+        backup_iscsi_disk_dev = deploy_utils.get_iscsi_disk_dev_path(iscsi_ip, 
+		    iscsi_port, iscsi_iqn, iscsi_lun)
+		
+		# login ipa iscsi disk
+        ret = client.start_iscsi_target(task.node, 'clone_iqn')
+        LOG.debug("client.start_iscsi_target return %s" % str(ret))
+        time.sleep(2)
+        deploy_utils.login_iscsi('10.1.0.4', 3260, 'clone_iqn')
+
+        ipa_iscsi_disk_dev = deploy_utils.get_iscsi_disk_dev_path('10.1.0.4', 
+		    3260, 'clone_iqn')			
+
+        # copy diska
+        LOG.debug("copy disk from %(from)s, to %(to)s ..." % 
+                    {"from": ipa_iscsi_disk_dev, "to": backup_iscsi_disk_dev})
+        ironic_utils.dd(ipa_iscsi_disk_dev, backup_iscsi_disk_dev)
+		
+        # reset disk image
+		#_reset_disk_image(backup_iscsi_disk_dev)
         LOG.debug("AgentClone.clone_baremetal_disk called over")
 
     def tear_down_clone():

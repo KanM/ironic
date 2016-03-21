@@ -612,3 +612,6 @@ class CIMCException(IronicException):
 
 class OneViewError(IronicException):
     _msg_fmt = _("OneView exception occurred. Error: %(error)s")
+
+class CloneException(IronicException):
+    _msg_fmt = _("Clone failed. Reason: %(error)s")

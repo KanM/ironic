@@ -343,7 +343,7 @@ class BaseAgentVendor(base.VendorInterface):
                 LOG.debug('Heartbeat from node %(node)s in maintenance mode; '
                           'not taking any action.', {'node': node.uuid})
                 return
-            elif node.clone_state in (states.CLONE_WAIT, states.CLONING):
+            elif node.clone_state in (states.CLONING):
                 self.continue_clone(task, **kwargs)
             elif (node.provision_state == states.DEPLOYWAIT and
                   not self.deploy_has_started(task)):
@@ -675,8 +675,18 @@ class BaseAgentVendor(base.VendorInterface):
     def continue_clone(self, task, **kwargs):
         LOG.debug("continue_clone is called")
         #task.process_event('wait') 
-        iscsi_ip = task.node.driver_info.get('iscsi_ip')
-        iqn = task.node.driver_info.get('iqn')
-        lun = task.node.driver_info.get('lun')
-        self._client.clone_disk(task.node, iscsi_ip, iqn, lun)
+        #iscsi_ip = task.node.driver_info.get('iscsi_ip')
+        #iqn = task.node.driver_info.get('iqn')
+        #lun = task.node.driver_info.get('lun')
+        #ret = self._client.clone_disk(task.node, iscsi_ip, iqn, lun)
+        #LOG.debug("ipa client returned %s" % ret)
+        #if ret['faultcode'] is not None:
+        #    task.process_clone_event('fail')
+        #    raise exception.CloneException(error="call ipa clone_disk failed")
+        #task.process_clone_event('wait')
+        try:
+            task.driver.clone.clone_baremetal_disk(task)
+        except Exception as e:
+            task.process_clone_event('fail')
+            raise e
         LOG.debug("continue_clone called over")

@@ -110,8 +110,10 @@ def discovery(portal_address, portal_port):
                   delay_on_retry=True)
 
 
-def login_iscsi(portal_address, portal_port, target_iqn):
+def login_iscsi(portal_address, portal_port, target_iqn, lun='lun-1'):
     """Login to an iSCSI target."""
+
+    LOG.debug("login_iscsi: %s" % portal_address + ','+ target_iqn)
     utils.execute('iscsiadm',
                   '-m', 'node',
                   '-p', '%s:%s' % (portal_address, portal_port),
@@ -128,16 +130,30 @@ def login_iscsi(portal_address, portal_port, target_iqn):
     # ensure file system sees the block device
     check_file_system_for_iscsi_device(portal_address,
                                        portal_port,
-                                       target_iqn)
+                                       target_iqn,
+                                       lun)
 
+    LOG.debug("login ok: %s" % portal_address + ','+ target_iqn)
+
+def get_iscsi_disk_dev_path(portal_address,
+                            portal_port,
+                            target_iqn,
+                            lun='lun-1'):
+    return "/dev/disk/by-path/ip-%s:%s-iscsi-%s-%s" % (portal_address,
+                                                          portal_port,
+                                                          target_iqn,
+                                                          lun)
 
 def check_file_system_for_iscsi_device(portal_address,
                                        portal_port,
-                                       target_iqn):
+                                       target_iqn,
+                                       lun='lun-1'):
     """Ensure the file system sees the iSCSI block device."""
-    check_dir = "/dev/disk/by-path/ip-%s:%s-iscsi-%s-lun-1" % (portal_address,
+    check_dir = "/dev/disk/by-path/ip-%s:%s-iscsi-%s-%s" % (portal_address,
                                                                portal_port,
-                                                               target_iqn)
+                                                               target_iqn,
+                                                               lun)
+    LOG.debug("checking iscsi dev %s" % check_dir)
     total_checks = CONF.disk_utils.iscsi_verify_attempts
     for attempt in range(total_checks):
         if os.path.exists(check_dir):
@@ -156,7 +172,7 @@ def check_file_system_for_iscsi_device(portal_address,
 
 def verify_iscsi_connection(target_iqn):
     """Verify iscsi connection."""
-    LOG.debug("Checking for iSCSI target to become active.")
+    LOG.debug("Checking for iSCSI target to become active for %s" % target_iqn)
 
     for attempt in range(CONF.disk_utils.iscsi_verify_attempts):
         out, _err = utils.execute('iscsiadm',

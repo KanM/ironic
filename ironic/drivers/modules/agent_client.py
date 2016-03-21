@@ -177,4 +177,5 @@ class AgentClient(object):
                   'lun': lun}
         return self._command(node=node,
                              method='clone.clone_disk',
-                             params=params)
+                             params=params,
+                             wait=True)
