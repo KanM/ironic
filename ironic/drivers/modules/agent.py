@@ -636,7 +636,7 @@ class AgentClone(base.CloneInterface):
         images.reset_image(backup_iscsi_disk_dev)
 
         # logout backup iscsi
-        deploy_utils.logout_iscsi('10.1.0.4', 3260, 'clone_iqn')
+        deploy_utils.logout_iscsi(iscsi_ip, iscsi_port, iscsi_iqn)
  
         # remove pxe configuration and reboot from local disk
         task.driver.boot.clean_up_ramdisk(task)
