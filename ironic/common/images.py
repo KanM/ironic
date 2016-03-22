@@ -581,4 +581,8 @@ def reset_image(img):
                   run_as_root=True,
                   check_exit_code=[0])
     # remove 2nd configdrive partition
-    # utils.execute("echo -e i'd\n2\nw\n' | fdisk %s" % img)
+    utils.execute('parted', '-s', img,
+                  'rm', '2',
+                  run_as_root=True,
+                  check_exit_code=[0])
+

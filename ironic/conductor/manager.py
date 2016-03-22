@@ -1205,7 +1205,7 @@ class ConductorManager(base_manager.BaseConductorManager):
                     if (task.node.provision_state in SYNC_EXCLUDED_STATES or
                             task.node.maintenance or
                             task.node.target_power_state or
-                            task.node.clone_state == state.CLONING):
+                            task.node.clone_state == states.CLONING):
                         continue
                     count = do_sync_power_state(
                         task, self.power_state_sync_count[node_uuid])

@@ -588,6 +588,8 @@ class AgentRAID(base.RAIDInterface):
 
 class AgentClone(base.CloneInterface):
     """"""
+    def validate(self, task):
+        pass
 
     def prepare_clone(self, task):
         LOG.debug("AgentClone.prepare_clone called...") 
