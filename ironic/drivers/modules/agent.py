@@ -642,6 +642,7 @@ class AgentClone(base.CloneInterface):
  
         # remove pxe configuration and reboot from local disk
         task.driver.boot.clean_up_ramdisk(task)
+        manager_utils.node_set_boot_device(task, 'disk', persistent=True)
         manager_utils.node_power_action(task, states.REBOOT)
 		
         LOG.debug("AgentClone.clone_baremetal_disk called over")
